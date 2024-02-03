@@ -24,6 +24,7 @@
     "views": {
       "orca-gui": [
         {
+          "type": "webview",
           "id": "orca-gui.Webview",
           "name": "Orca GUI"
         }
@@ -60,8 +61,9 @@
     "process": "^0.11.10",
     "ts-loader": "^9.5.1",
     "typescript": "^5.3.3",
-    "webpack": "^5.90.0",
-    "webpack-cli": "^5.1.4"
+    "webpack": "^5.90.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-merge": "^5.10.0"
   },
   "dependencies": {
     "fs": "^0.0.1-security",
