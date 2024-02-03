@@ -1,0 +1,66 @@
+{
+  "name": "orca-gui",
+  "displayName": "orca-gui",
+  "description": "GUI for viewing orca configurations",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.86.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "browser": "./dist/web/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "orca-gui",
+          "title": "Orca GUI",
+          "icon": "media/orca-whale-svgrepo-com.svg"
+        }
+      ]
+    },
+    "views": {
+      "orca-gui": [
+        {
+          "id": "orca-gui.view",
+          "name": "Orca GUI"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "orca-gui.helloWorld",
+        "title": "Hello World"
+      }
+    ]
+  },
+  "scripts": {
+    "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
+    "pretest": "npm run compile-web",
+    "vscode:prepublish": "npm run package-web",
+    "compile-web": "webpack",
+    "watch-web": "webpack --watch",
+    "package-web": "webpack --mode production --devtool hidden-source-map",
+    "lint": "eslint src --ext ts",
+    "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
+  },
+  "devDependencies": {
+    "@types/assert": "^1.5.10",
+    "@types/mocha": "^10.0.6",
+    "@types/vscode": "^1.86.0",
+    "@types/webpack-env": "^1.18.4",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "@vscode/test-web": "^0.0.51",
+    "assert": "^2.1.0",
+    "eslint": "^8.56.0",
+    "mocha": "^10.2.0",
+    "process": "^0.11.10",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
