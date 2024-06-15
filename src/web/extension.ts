@@ -27,8 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider('orca-gui.Webview', {
 			async resolveWebviewView(view, ctx: vscode.WebviewViewResolveContext<unknown>, token: vscode.CancellationToken) {
-				console.log('viewProvider ran');
-				// view.webview.html = '<html><body><h1>Hello World</h1></body></html>';
+
 				view.webview.options = {
 					// Enable scripts in the webview
 					enableScripts: true,
@@ -37,68 +36,14 @@ export function activate(context: vscode.ExtensionContext) {
 					localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'react-app', 'build')]
 				};
 				
-				const { scriptUri, styleUri, mediaUri } = await getAssetFileUris(context);
+				const htmlContent = await vscode.workspace.fs.readFile(vscode.Uri.file(indexPath));
+				const textDecoder = new TextDecoder('utf-8'); // Specify the encoding if it's not utf-8
+				view.webview.html = textDecoder.decode(htmlContent);
 
-				// const scriptUri = view.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri,'react-app', 'build', 'static', 'js', 'main.017109ac.js'));
-				// const cssUri = view.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'react-app', 'build', 'static', 'css', 'main.f855e6bc.css'));
-				
-				view.webview.html = `
-				<!doctype html>
-				<html lang="en">
-				  <head>
-					<!-- ... -->
-					<script defer src="${scriptUri}"></script>
-					<link href="${styleUri}" rel="stylesheet">
-				  </head>
-				  <body>
-					<div id="root"></div>
-				  </body>
-				</html>
-				`;
-				console.log('html', view.webview.html);
-				// view.webview.onDidReceiveMessage(message => {
-				// 	// Handle messages from the webview if needed
-				// });
 			}
 		}));
 
-
 }
-
-async function getAssetFileUris(context: vscode.ExtensionContext) {
-	// Get the URI of the asset manifest file
-	const assetManifestUri = vscode.Uri.joinPath(context.extensionUri, 'react-app', 'build', 'asset-manifest.json');
-  
-	// Read the asset manifest file
-	const assetManifestData = await vscode.workspace.fs.readFile(assetManifestUri);
-
-	const textDecoder = new TextDecoder('utf-8'); // Specify the encoding if it's not utf-8
-
-	// Convert the Uint8Array to a string
-	const assetManifestDataString = textDecoder.decode(assetManifestData);
-	console.log('assetManifestData', assetManifestDataString);
-	const assetManifest = JSON.parse(assetManifestDataString);
-  
-	// Get the filename of the main JavaScript file
-	const mainJsFilename = assetManifest['files']['main.js'].split('/').pop();
-  
-	// Get the filename of the main CSS file
-	const mainCssFilename = assetManifest['files']['main.css'].split('/').pop();
-  
-	// Get the filename of the main media file (replace 'main-media' with the actual key)
-	const mainMediaFilename = assetManifest['files']['main-media'].split('/').pop();
-  
-	// Get the URI of the main JavaScript file
-	const scriptUri = vscode.Uri.joinPath(context.extensionUri, 'react-app', 'build', 'static', 'js', mainJsFilename);
-  
-	// Get the URI of the main CSS file
-	const styleUri = vscode.Uri.joinPath(context.extensionUri, 'react-app', 'build', 'static', 'css', mainCssFilename);
-  
-	// Get the URI of the main media file
-	const mediaUri = vscode.Uri.joinPath(context.extensionUri, 'react-app', 'build', 'static', 'media', mainMediaFilename);
-  
-	return { scriptUri, styleUri, mediaUri };
-  }
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
