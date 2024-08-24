@@ -1,7 +1,7 @@
 {
-  "name": "orca-gui",
-  "displayName": "orca-gui",
-  "description": "GUI for viewing orca configurations",
+  "name": "orca-vs-code-ext",
+  "displayName": "orca-vs-code-ext",
+  "description": "VS Code extensions for Ocra Lab Automation Scheduler",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.86.0"
@@ -15,24 +15,24 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "orca-gui",
-          "title": "Orca GUI",
+          "id": "orca-vs-code-ext",
+          "title": "Orca",
           "icon": "media/orca-whale-svgrepo-com.svg"
         }
       ]
     },
     "views": {
-      "orca-gui": [
+      "orca-vs-code-ext": [
         {
           "type": "webview",
-          "id": "orca-gui.Webview",
+          "id": "orca-vs-code-ext.Webview",
           "name": "Orca GUI"
         }
       ]
     },
     "commands": [
       {
-        "command": "orca-gui.helloWorld",
+        "command": "orca-vs-code-ext.helloWorld",
         "title": "Hello World"
       }
     ]
@@ -67,6 +67,7 @@
   },
   "dependencies": {
     "fs": "^0.0.1-security",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "pythonia": "^1.2.1"
   }
 }
