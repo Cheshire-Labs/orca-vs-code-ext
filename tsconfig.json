@@ -1,10 +1,9 @@
 {
 	"compilerOptions": {
 		"module": "Node16",
-		"target": "ES2020",
-		"outDir": "dist",
+		"target": "ES2022",
 		"lib": [
-			"ES2020", "WebWorker"
+			"ES2022"
 		],
 		"sourceMap": true,
 		"rootDir": "src",
