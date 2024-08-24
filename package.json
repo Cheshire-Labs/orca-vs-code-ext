@@ -16,6 +16,31 @@
       {
         "command": "orca-ide.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "title": "Generate Orca Configuration Template",
+        "category": "Orca",
+        "command": "orca-ide.generateYamlTemplate"
+      },
+      {
+        "title": "Load Orca Configuration",
+        "category": "Orca",
+        "command": "orca-ide.loadYaml"
+      },
+      {
+        "title": "Initialize Resources",
+        "category": "Orca",
+        "command": "orca-ide.initialize"
+      },
+      {
+        "title": "Run Workflow",
+        "category": "Orca",
+        "command": "orca-ide.runWorkflow"
+      },
+      {
+        "title": "Run Method",
+        "category": "Orca",
+        "command": "orca-ide.runMethod"
       }
     ]
   },
