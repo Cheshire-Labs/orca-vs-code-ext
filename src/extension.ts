@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { generateYamlTemplate } from './generateYamlTemplate';
 import { python } from 'pythonia';
 
 // This method is called when your extension is activated
@@ -19,8 +20,14 @@ export function activate(context: vscode.ExtensionContext) {
         orcaCoreInstance = await new orcaCore(configFilePath);
     }
 
+	// Command to generate a YAML template
+	let generateYamlCommand = vscode.commands.registerCommand('orca-ide.generateYamlTemplate', async () => {
+		await generateYamlTemplate();
+	});
+
+
 	  // Command to load a YAML file in Orca and initialize
-	  let loadYamlCommand = vscode.commands.registerCommand('orca.loadYaml', async () => {
+	  let loadYamlCommand = vscode.commands.registerCommand('orca-ide.loadYaml', async () => {
         const filePath = await vscode.window.showInputBox({ placeHolder: 'Enter the path to the YAML file' });
         if (filePath) {
             try {
@@ -33,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // Command to initialize resources
-    let initializeCommand = vscode.commands.registerCommand('orca.initialize', async () => {
+    let initializeCommand = vscode.commands.registerCommand('orca-ide.initialize', async () => {
         if (!orcaCoreInstance) {
             vscode.window.showErrorMessage('Orca Core is not initialized. Load a YAML file first.');
             return;
@@ -47,7 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // Command to run a workflow
-    let runWorkflowCommand = vscode.commands.registerCommand('orca.runWorkflow', async () => {
+    let runWorkflowCommand = vscode.commands.registerCommand('orca-ide.runWorkflow', async () => {
         const workflowName = await vscode.window.showInputBox({ placeHolder: 'Enter the workflow name' });
         if (workflowName && orcaCoreInstance) {
             try {
@@ -60,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // Command to run a method
-    let runMethodCommand = vscode.commands.registerCommand('orca.runMethod', async () => {
+    let runMethodCommand = vscode.commands.registerCommand('orca-ide.runMethod', async () => {
         const methodName = await vscode.window.showInputBox({ placeHolder: 'Enter the method name' });
         if (methodName && orcaCoreInstance) {
             try {
@@ -75,6 +82,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 	context.subscriptions.push(
+		generateYamlCommand,
 		loadYamlCommand, 
 		initializeCommand, 
 		runWorkflowCommand, 
