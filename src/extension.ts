@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     let orcaCoreInstance: any;
 
-    async function initializeOrcaCore(configFilePath: string) {
+    async function loadOrcaConfig(configFilePath: string) {
         const orcaModule = await python('orca_core');
         const orcaCore = await orcaModule.OrcaCore;
         orcaCoreInstance = await new orcaCore(configFilePath);
@@ -31,8 +31,9 @@ export function activate(context: vscode.ExtensionContext) {
         const filePath = await vscode.window.showInputBox({ placeHolder: 'Enter the path to the YAML file' });
         if (filePath) {
             try {
-                await initializeOrcaCore(filePath);
-                vscode.window.showInformationMessage(`Orca initialized with config: ${filePath}`);
+                vscode.window.showInformationMessage(`Loading YAML file: ${filePath}`);
+                await loadOrcaConfig(filePath);
+                vscode.window.showInformationMessage(`Orca loaded: ${filePath}`);
             } catch (error) {
                 vscode.window.showErrorMessage(`Failed to initialize Orca: ${error}`);
             }
@@ -42,10 +43,11 @@ export function activate(context: vscode.ExtensionContext) {
     // Command to initialize resources
     let initializeCommand = vscode.commands.registerCommand('orca-ide.initialize', async () => {
         if (!orcaCoreInstance) {
-            vscode.window.showErrorMessage('Orca Core is not initialized. Load a YAML file first.');
+            vscode.window.showErrorMessage('Orca Core is not connfigured with a YAML file. Load a YAML file first.');
             return;
         }
         try {
+            vscode.window.showInformationMessage('Initializing resources...');
             await orcaCoreInstance.initialize();
             vscode.window.showInformationMessage('All resources initialized successfully!');
         } catch (error) {
@@ -58,6 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
         const workflowName = await vscode.window.showInputBox({ placeHolder: 'Enter the workflow name' });
         if (workflowName && orcaCoreInstance) {
             try {
+                vscode.window.showInformationMessage(`Starting workflow: ${workflowName}`);
                 const workflowId = await orcaCoreInstance.run_workflow(workflowName);
                 vscode.window.showInformationMessage(`Workflow ${workflowName} started with ID: ${workflowId}`);
             } catch (error) {
