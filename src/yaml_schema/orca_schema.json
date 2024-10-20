@@ -1,0 +1,212 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Orca Configuration",
+    "description": "Schema for building an Orca YAML configuration file.",
+    "type": "object",
+    "required": ["system", "labwares", "resources", "methods", "workflows", "config"],
+    "properties": {
+      "system": {
+        "type": "object",
+        "description": "System configuration for the lab automation setup.",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the system configuration."
+          },
+          "description": {
+            "type": "string",
+            "description": "A brief description of the system."
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the system."
+          }
+        }
+      },
+      "labwares": {
+        "type": "object",
+        "description": "Defines the labwares used in the assay.",
+        "patternProperties": {
+          "^[a-zA-Z0-9_-]+$": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Type of labware."
+              },
+              "static": {
+                "type": "boolean",
+                "description": "True if the labware does not move, otherwise false."
+              }
+            },
+            "required": ["type"]
+          }
+        }
+      },
+      "resources": {
+        "type": "object",
+        "description": "Defines resources in the lab automation system.",
+        "patternProperties": {
+          "^[a-zA-Z0-9_-]+$": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Type of resource (e.g., 'bravo', 'hamilton')."
+              },
+              "ip": {
+                "type": "string",
+                "description": "IP address of the resource."
+              },
+              "com": {
+                "type": "string",
+                "description": "COM port of the resource."
+              },
+              "plate-pad": {
+                "type": "string",
+                "description": "Optional teachpoint name matching the teachpoint location identifier."
+              }
+            },
+            "required": ["type"]
+          }
+        }
+      },
+      "methods": {
+        "type": "object",
+        "description": "Defines the methods available in the system.",
+        "patternProperties": {
+          "^[a-zA-Z0-9_-]+$": {
+            "type": "object",
+            "description": "Method definition",
+            "properties": {
+              "actions": {
+                "type": "array",
+                "description": "A list of actions that the method will execute.",
+                "patternProperties": {
+                  "^[a-zA-Z0-9_-]+$": {
+                    "type": "object",
+                    "description": "Action to be performed at the specified equipment",
+                    "required": ["command"],
+                    "properties": {
+                      "command": {
+                        "type": "string",
+                        "description": "Command to be executed."
+                      },
+                      "inputs": {
+                        "type": "array",
+                        "description": "List of labwares to be present before the command is executed.",
+                        "items": {
+                          "type": "string",
+                          "description": "Name of the labware." 
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+          "required": ["actions"]
+          }
+        }
+      },
+      "workflows": {
+        "type": "object",
+        "description": "Defines the workflows for the system.",
+        "patternProperties": {
+          "^[a-zA-Z0-9_-]+$": {
+            "type": "object",
+            "required": ["threads"],
+            "properties": {
+              "workflow_name": {
+                "type": "string",
+                "description": "Name of the workflow."
+              },
+              "threads": {
+                "type": "object",
+                "description": "Defines the threads in the workflow.",
+                "patternProperties": {
+                  "^[a-zA-Z0-9_-]+$": {
+                    "type": "object",
+                    "required": ["labware", "start", "end", "steps"],
+                    "properties": {
+                      "labware": {
+                        "type": "string",
+                        "description": "Name of the labware used in the thread."
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Type of the thread.",
+                        "enum": ["start", "wrapper"],
+                        "default": "wrapper"
+                      },
+                      "start": {
+                        "type": "string",
+                        "description": "Name of a location at which the labware should start."
+                      },
+                      "end": {
+                        "type": "string",
+                        "description": "Name of a location at which the labware should end."
+                      },
+                      "steps": {
+                        "type": "array",
+                        "description": "List of steps in the thread.",
+                        "items": {
+                          "type": ["object", "string"],
+                          "description": "Name of the step.",
+                          "properties": {
+                            "method": {
+                              "type": "string",
+                              "description": "Name of the method used in the step."
+                            },
+                            "spawn": {
+                              "type": "array",
+                              "description": "Ordered list of labwares to spawn in the step.",
+                              "items": {
+                                "type": "string",
+                                "description": "Name of the labware to spawn."
+                              }
+                            }
+                          }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "config": {
+        "type": "object",
+        "description": "Configuration settings for the assay.",
+        "properties": {
+          "timeout": {
+            "type": "integer",
+            "description": "Timeout setting for the assay in seconds."
+          },
+          "retry": {
+            "type": "integer",
+            "description": "Number of retries for the assay."
+          }
+        }
+      },
+      "scripting": {
+        "type": "object",
+        "description": "Scripts used in the system.",
+        "patternProperties": {
+          "^[a-zA-Z0-9_-]+$": {
+            "type": "object",
+            "properties": {
+              "script": {
+                "type": "string",
+                "description": "Path to the script."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+  
