@@ -57,6 +57,7 @@ async function startOrcaServer() {
 
 function stopOrcaServer() {
     if (orcaProcess) {
+        orcaProcess.stdin?.end();
         orcaProcess.kill('SIGTERM');  // Send a terminate signal to stop the process
         orcaProcess = null;
         vscode.window.showInformationMessage('Orca server stopped.');
@@ -279,6 +280,7 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 
     if (orcaProcess) {
+        orcaProcess.stdin?.end();
         orcaProcess.kill('SIGTERM');
         orcaProcess = null;
     }
