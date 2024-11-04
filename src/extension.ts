@@ -2,47 +2,72 @@ import * as vscode from 'vscode';
 import { generateYamlTemplate } from './generateYamlTemplate';
 import axios, { get } from 'axios'; 
 import { exec, ChildProcess } from 'child_process';
+import { io, Socket } from 'socket.io-client';
 
 
 
-
+let url: string = 'http://127.0.0.1:5000';
+let logging_url: string = 'http://127.0.0.1/logging';
 const orcaProcessName = 'orca-server';
 let orcaProcess: ChildProcess | null = null;
-let url: string = 'http://127.0.0.1:5000';
+
+let logging_socket: Socket | null = null;
 
 const orcaOutputChannel = vscode.window.createOutputChannel("Orca Logs");
-const extensionOutputChannel = vscode.window.createOutputChannel("Extension Logs");
+const orcaServerOutputChannel = vscode.window.createOutputChannel("Orca Server Logs");
+const extensionOutputChannel = vscode.window.createOutputChannel("Orca Extension Logs");
 
-async function startOrcaServer() {
+function setupLoggingSocket() {
+    extensionOutputChannel.appendLine('Setting up Socket.IO connection...');
+    logging_socket = io(logging_url);
+    
+    logging_socket.on('connect', () => {
+        extensionOutputChannel.appendLine('Connected to Orca server logs via Socket.IO');
+        vscode.window.showInformationMessage('Connected to Orca server logs');
+    });
+
+    logging_socket.on('log_message', (message) => {
+        if (message && message.data) {
+            orcaOutputChannel.appendLine(message.data);
+        }
+    });
+
+    logging_socket.on('disconnect', () => {
+        vscode.window.showWarningMessage('Disconnected from Orca server logs.');
+        extensionOutputChannel.appendLine('Socket.IO disconnected');
+        logging_socket = null;
+    });
+
+    logging_socket.on('connect_error', (error) => {
+        extensionOutputChannel.appendLine(`Socket.IO connection error: ${error}`);
+        vscode.window.showErrorMessage('Error connecting to Orca server logs');
+    });
+    extensionOutputChannel.appendLine('Socket.IO setup complete');
+}
+
+
+
+async function startOrcaServer(): Promise<void> {
+    if (orcaProcess) {
+        return;
+    }
     
     // TODO: fix paths
     const pythonPath = `C:\\Users\\miike\\source\\repos\\orca\\orca-core\\.venv\\Scripts\\python`;
     const scriptPath = `C:\\Users\\miike\\source\\repos\\orca\\orca-core\\src\\orca\\cli\\orca_rest_api.py`;
     
-
-    
-     
-    orcaProcess = exec(`${pythonPath} ${scriptPath}`);
+    extensionOutputChannel.appendLine(`Starting Orca server...`);
+    orcaProcess = await exec(`${pythonPath} ${scriptPath}`);
 
     orcaProcess.stdout?.on("data", (data: string) => {
-        
-        
-        // TODO: this is taking output regarding the flask server, not output regarding the orca workflow
-
-
-
-
-        orcaOutputChannel.appendLine(data);  // Send stdout data to Orca Logs
+        orcaServerOutputChannel.appendLine(data);
      });
- 
-    // orcaProcess.stderr?.on("data", (data: string) => {
-    //     orcaOutputChannel.appendLine(`Error: ${data}`);  // Send stderr data to Orca Logs
-    //     vscode.window.showErrorMessage(`Orca server error: ${data}`);
-    // });
- 
+    orcaProcess.stderr?.on("data", (data: string) => {
+        orcaServerOutputChannel.appendLine(data);
+    });
     orcaProcess.on("exit", (code, signal) => {
         const exitMessage = `Orca server exited with code ${code} and signal ${signal}`;
-        orcaOutputChannel.appendLine(exitMessage);
+        orcaServerOutputChannel.appendLine(exitMessage);
         extensionOutputChannel.appendLine(exitMessage);
         vscode.window.showInformationMessage('Orca server stopped.');
         orcaProcess = null;
@@ -50,10 +75,50 @@ async function startOrcaServer() {
     process.on('exit', () => stopOrcaServer());
     process.on('SIGINT', () => stopOrcaServer());
     process.on('SIGTERM', () => stopOrcaServer());
- 
-    vscode.window.showInformationMessage('Orca server started.');
-    orcaOutputChannel.show();  // Optionally show the Orca output channel when the server starts
+    extensionOutputChannel.appendLine(`Orca server started.`);
+    
+    orcaServerOutputChannel.show();
+
+    await waitforhost(url);
+   
+
+    
+    
+    setupLoggingSocket();
+    logging_socket?.connect();
+    orcaOutputChannel.show();
 }
+
+function waitforhost(_url: string , interval: number = 1000, attempts: number = 10): Promise<void> {
+  
+    const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+    
+    let count = 1;
+  
+    return new Promise(async (resolve, reject) => {
+      while (count < attempts) {
+  
+        await sleep(interval);
+  
+        try {
+          const response = await fetch(`${_url}/test`);
+          if (response.ok) {
+            if (response.status === 200) {
+              resolve();
+              break;
+            }
+          } else {
+            count++;
+          }
+        } catch {
+          count++;
+          console.log(`Still down, trying ${count} of ${attempts}`);
+        }
+      }
+  
+      reject(new Error(`Server is down: ${count} attempts tried`));
+    });
+  }
 
 function stopOrcaServer() {
     if (orcaProcess) {
@@ -64,10 +129,12 @@ function stopOrcaServer() {
     } else {
         vscode.window.showWarningMessage('Orca server is not running.');
     }
+    logging_socket?.disconnect();
 }
 
 
 export function activate(context: vscode.ExtensionContext) {
+
 
 	console.log('Congratulations, your extension "orca-ide" is now active!');
 
@@ -78,15 +145,20 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
     async function loadOrcaConfig(configFilePath: string) {
-        vscode.window.showInformationMessage(`Loading YAML file: ${configFilePath}`);
+        extensionOutputChannel.appendLine(`Loading YAML file: ${configFilePath}`);
         try {
 			await axios.post(url + '/load', {
 				config_file: configFilePath
 			});
-			vscode.window.showInformationMessage(`Orca loaded: ${configFilePath}`);
+            
 		} catch (error) {
+            extensionOutputChannel.appendLine(`Failed to load Orca: ${error}`);
 			vscode.window.showErrorMessage(`Failed to load Orca: ${error}`);
+            return;
 		}
+        vscode.window.showInformationMessage(`Loaded YAML file: ${configFilePath}`);
+        extensionOutputChannel.appendLine(`Loaded YAML file: ${configFilePath}`);
+
     }
 
     async function getWorkflowNames(): Promise<string[] | undefined> {
@@ -162,15 +234,10 @@ export function activate(context: vscode.ExtensionContext) {
 	let loadYamlCommand = vscode.commands.registerCommand('orca-ide.loadYaml', async () => {
         const filePath = "C:\\Users\\miike\\source\\repos\\orca\\orca-core\\examples\\smc_assay\\smc_assay_example.orca.yml";
         await startOrcaServer();
-    
+        // await waitforhost(url);
         // const filePath = await vscode.window.showInputBox({ placeHolder: 'Enter the path to the YAML file' });
         if (filePath) {
-            try {
-                
-                await loadOrcaConfig(filePath);
-            } catch (error) {
-                vscode.window.showErrorMessage(`Failed to initialize Orca: ${error}`);
-            }
+            await loadOrcaConfig(filePath);
         }
     });
 
@@ -178,7 +245,7 @@ export function activate(context: vscode.ExtensionContext) {
     let initializeCommand = vscode.commands.registerCommand('orca-ide.initialize', async () => {
         try {
 			await axios.post(url + '/init');
-			vscode.window.showInformationMessage('All resources initialized successfully!');
+			vscode.window.showInformationMessage('Resources initialized successfully!');
 		} catch (error) {
 			vscode.window.showErrorMessage(`Failed to initialize resources: ${error}`);
 		}
@@ -278,10 +345,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 // This method is called when your extension is deactivated
 export function deactivate() {
-
+    logging_socket?.disconnect();
     if (orcaProcess) {
         orcaProcess.stdin?.end();
         orcaProcess.kill('SIGTERM');
         orcaProcess = null;
     }
+    
 }
