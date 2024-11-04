@@ -7,7 +7,7 @@ import { io, Socket } from 'socket.io-client';
 
 
 let url: string = 'http://127.0.0.1:5000';
-let logging_url: string = 'http://127.0.0.1/logging';
+let logging_url: string = 'http://127.0.0.1:5000/logging';
 const orcaProcessName = 'orca-server';
 let orcaProcess: ChildProcess | null = null;
 
