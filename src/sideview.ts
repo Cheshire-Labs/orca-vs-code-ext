@@ -1,45 +1,34 @@
 import * as vscode from 'vscode';
 import { OrcaApi } from './orcaApi';
 
-export class OrcaSideViewProvider implements vscode.TreeDataProvider<vscode.TreeItem>{
+export class WorkflowTreeViewProvider implements vscode.TreeDataProvider<WorkflowTreeItem> {
     private orcaApi: OrcaApi;
-    private configLoaded: boolean = false;
     private workflows: WorkflowTreeItem[] = [];
-    private methods: MethodTreeItem[] = [];
-    private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined | null | void> = new vscode.EventEmitter<vscode.TreeItem | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
-    
-
-
-
-    // TODO:  Need to implement this for a new view to hold the methods
-
-
-
+    private configLoaded: boolean = false;
+    private _onDidChangeTreeData: vscode.EventEmitter<WorkflowTreeItem | undefined | null | void> = new vscode.EventEmitter<WorkflowTreeItem | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<WorkflowTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
     constructor(orcaApi: OrcaApi) {
         this.orcaApi = orcaApi;
+        this.configLoaded = false;
         this.orcaApi.subscribeOnConfigLoaded(this.onConfigLoaded.bind(this));
     }
-    getTreeItem(element: vscode.TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
+
+    getTreeItem(element: WorkflowTreeItem): vscode.TreeItem {
         return element;
-        
     }
 
-    getChildren(element?: vscode.TreeItem): vscode.ProviderResult<vscode.TreeItem[]> {
+    getChildren(element?: WorkflowTreeItem): vscode.ProviderResult<WorkflowTreeItem[]> {
         if (!element) {
+            if (!this.configLoaded) { 
+                return [new WorkflowTreeItem('Load a configuration file to see workflows')]; 
+            }
             return this.workflows;
-        } else if (element instanceof WorkflowTreeItem) {
-            const workflowName = element.label ? String(element.label) : '';
-            return [new MethodTreeItem(workflowName)];
         }
         return [];
     }
 
     onConfigLoaded(configLoaded: boolean) {
-        if (this.configLoaded === configLoaded) {
-            return;
-        }
         this.configLoaded = configLoaded;
         this.refreshTree();
     }
@@ -52,7 +41,7 @@ export class OrcaSideViewProvider implements vscode.TreeDataProvider<vscode.Tree
                 this._onDidChangeTreeData.fire();
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`Error refreshing tree: ${error}`);
+            vscode.window.showErrorMessage(`Error refreshing workflows: ${error}`);
         }
     }
 
@@ -60,37 +49,83 @@ export class OrcaSideViewProvider implements vscode.TreeDataProvider<vscode.Tree
         try {
             this.workflows = [];
             const workflowNames = await this.orcaApi.getWorkflowNames();
-            if (workflowNames && Array.isArray(workflowNames)) {
-                this.workflows = workflowNames.map((name: string) => new WorkflowTreeItem(name));
+            if (Array.isArray(workflowNames)) {
+                this.workflows = workflowNames.map(name => new WorkflowTreeItem(name));
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`Error refreshing tree: ${error}`);
-        }
-    }
-
-    private async getMethods(): Promise<void | undefined>  {
-        this.methods = [];
-        let methodNames = await this.orcaApi.getMethodNames();
-        if (methodNames) {
-            methodNames.forEach((methodName: string) => {
-                this.methods.push(new MethodTreeItem(methodName));
-            });
+            vscode.window.showErrorMessage(`Error getting workflows: ${error}`);
         }
     }
 }
 
+export class MethodTreeViewProvider implements vscode.TreeDataProvider<MethodTreeItem> {
+    private orcaApi: OrcaApi;
+    private configLoaded: boolean = false;
+    private methods: MethodTreeItem[] = [];
+    private _onDidChangeTreeData: vscode.EventEmitter<MethodTreeItem | undefined | null | void> = new vscode.EventEmitter<MethodTreeItem | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<MethodTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
-class WorkflowTreeItem extends vscode.TreeItem {
+    constructor(orcaApi: OrcaApi) {
+        this.orcaApi = orcaApi;
+        this.configLoaded = false;
+        this.orcaApi.subscribeOnConfigLoaded(this.onConfigLoaded.bind(this));
+    }
+
+    getTreeItem(element: MethodTreeItem): vscode.TreeItem {
+        return element;
+    }
+
+    getChildren(element?: MethodTreeItem): vscode.ProviderResult<MethodTreeItem[]> {
+        if (!element) {
+            if (!this.configLoaded) { 
+                return [new WorkflowTreeItem('Load a configuration file to see methods')]; 
+            }
+            return this.methods;
+        }
+        return [];
+    }
+
+    onConfigLoaded(configLoaded: boolean) {
+        this.configLoaded = configLoaded;
+        this.refreshTree();
+    }
+
+    async refreshTree(): Promise<void> {
+        try {
+            const isConnected = await this.orcaApi.isConnectable();
+            if (isConnected) {
+                await this.getMethods();
+                this._onDidChangeTreeData.fire();
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error refreshing methods: ${error}`);
+        }
+    }
+
+    private async getMethods(): Promise<void> {
+        try {
+            this.methods = [];
+            const methodNames = await this.orcaApi.getMethodNames();
+            if (Array.isArray(methodNames)) {
+                this.methods = methodNames.map(name => new MethodTreeItem(name));
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error getting methods: ${error}`);
+        }
+    }
+}
+
+export class WorkflowTreeItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
-        public readonly collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Expanded,
+        public readonly collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None,
         public readonly contextValue: string = 'workflow'
     ) {
         super(label, collapsibleState);
     }
 }
 
-class MethodTreeItem extends vscode.TreeItem {
+export class MethodTreeItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
         public readonly contextValue: string = 'method'

@@ -4,7 +4,7 @@ import axios, { get } from 'axios';
 import { loggingChannels } from './loggingChannels';
 import { OrcaServer } from './orcaServer';
 import { OrcaApi } from './orcaApi';
-import { OrcaSideViewProvider } from './sideview';
+import { WorkflowTreeViewProvider, MethodTreeViewProvider, WorkflowTreeItem, MethodTreeItem } from './sideview';
 
 
 let url: string = 'http://127.0.0.1:5000';
@@ -13,9 +13,7 @@ let orcaServer = new OrcaServer(url, vscodeLogs);
 let orcaApi: OrcaApi = new OrcaApi(url, vscodeLogs);
 
 
-export function activate(context: vscode.ExtensionContext) {
-
-    
+export function activate(context: vscode.ExtensionContext) { 
 
     	// Command to generate a YAML template
 	let generateYamlCommand = vscode.commands.registerCommand('orca-ide.generateYamlTemplate', async () => {
@@ -52,97 +50,117 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // Command to run a workflow
-    let runWorkflowCommand = vscode.commands.registerCommand('orca-ide.runWorkflow', async () => {
-        const workflowNames = await orcaApi.getWorkflowNames();
-        if (!workflowNames) {
-            vscode.window.showErrorMessage('No workflow recipes found.');
+    const runWorkflowCommand = vscode.commands.registerCommand('orca-ide.runWorkflow', async (item?: WorkflowTreeItem) => {
+        const workflowName = item?.label ?? await selectWorkflowName();
+        if (!workflowName) {
+            vscode.window.showInformationMessage('Workflow not selected.');
             return;
         }
-        const workflowName = await vscode.window.showQuickPick(workflowNames, {placeHolder: 'Select the workflow to run'});
-        try{
-            const workflowId =  await axios.post(url + '/run_workflow',
-                {
-                    workflow_name: workflowName
-                }
-            );
-            vscode.window.showInformationMessage(`Workflow ${workflowName} started with ID: ${workflowId}`);
-        } catch (error) {
-            vscode.window.showErrorMessage(`Failed to run workflow: ${error}`);
+    
+        try {
+            const response = await axios.post(`${url}/run_workflow`, { workflow_name: workflowName });
+            const workflowId = response.data?.workflowId ?? 'Unknown ID';
+    
+            vscode.window.showInformationMessage(`Workflow "${workflowName}" started with ID: ${workflowId}`);
+        } catch (error: any) {
+            const errorMessage = error?.message ?? 'Unknown error';
+            vscode.window.showErrorMessage(`Failed to run workflow: ${errorMessage}`);
         }
-        
     });
+    
+
+
+    async function selectWorkflowName(): Promise<string | undefined> {
+        const workflowNames = await orcaApi.getWorkflowNames();
+        if (!workflowNames || workflowNames.length === 0) {
+            vscode.window.showErrorMessage('No workflow recipes found.');
+            return undefined;
+        }
+    
+        return vscode.window.showQuickPick(workflowNames, { placeHolder: 'Select the workflow to run' });
+    }
 
     
 
-    // Command to run a method
-    let runMethodCommand = vscode.commands.registerCommand('orca-ide.runMethod', async () => {
-        const methodNames = await orcaApi.getMethodNames();
-        if (!methodNames) {
-            vscode.window.showErrorMessage('No method recipes found.');
-            return;
-        }
-        const methodName = await vscode.window.showQuickPick(methodNames, {placeHolder: 'Select the method to run'});
+    const runMethodCommand = vscode.commands.registerCommand('orca-ide.runMethod', async (item?: MethodTreeItem) => {
+        // Determine the method name from the TreeItem or prompt the user to select one
+        const methodName = item?.label ?? await selectMethodName();
         if (!methodName) {
-            vscode.window.showInformationMessage(`Method not selected.`);
+            vscode.window.showInformationMessage('Method not selected.');
             return;
         }
+    
+        // Get input labwares, output labwares, and locations
         const inputLabwares = await orcaApi.getMethodRecipeInputLabwares(methodName);
         if (!inputLabwares) {
             vscode.window.showErrorMessage('Failed to get input labwares.');
             return;
         }
+    
         const outputLabwares = await orcaApi.getMethodRecipeOutputLabwares(methodName);
         if (!outputLabwares) {
             vscode.window.showErrorMessage('Failed to get output labwares.');
             return;
         }
+    
         const locations = await orcaApi.getLocationNames();
         if (!locations) {
             vscode.window.showErrorMessage('Failed to get locations.');
             return;
         }
-        let startMap: Record<string, string> = {};
-        let endMap: Record<string, string> = {};
-            
-        for (const labware of inputLabwares) {
-            let startLocation = await vscode.window.showQuickPick(locations, { placeHolder: `Select the START location for ${labware}` });
-            if (!startLocation) {
-                vscode.window.showInformationMessage(`Start location not selected.`);
-                return;
-            }
-            startMap[labware] = startLocation;
+    
+        // Prompt the user to select start and end locations for labwares
+        const startMap: Record<string, string> | undefined = await getLocationMap(inputLabwares, locations, 'START');
+        const endMap: Record<string, string> | undefined = await getLocationMap(outputLabwares, locations, 'END');
+    
+        if (!startMap || !endMap) {
+            vscode.window.showInformationMessage('Location selection was cancelled.');
+            return;
         }
-        
-        for (const labware of outputLabwares) {
-            let endLocation = await vscode.window.showQuickPick(locations, { placeHolder: `Select the END location for ${labware}` });
-            if (!endLocation) {
-                vscode.window.showInformationMessage(`End location not selected.`);
-                return;
-            }
-            endMap[labware] = endLocation;
+    
+        // Run the method
+        try {
+            const response = await axios.post(`${url}/run_method`, {
+                method_name: methodName,
+                start_map: JSON.stringify(startMap),
+                end_map: JSON.stringify(endMap),
+            });
+    
+            const methodId = response.data?.methodId ?? 'Unknown ID';
+            vscode.window.showInformationMessage(`Method "${methodName}" started with ID: ${methodId}`);
+        } catch (error: any) {
+            const errorMessage = error?.message ?? 'Unknown error';
+            vscode.window.showErrorMessage(`Failed to run method: ${errorMessage}`);
         }
-        
-        try{
-            
-            const methodId =  await axios.post(url + '/run_method',
-                {
-                    method_name: methodName,
-                    start_map: JSON.stringify(startMap),
-					end_map: JSON.stringify(endMap)
-                }
-            );
-            vscode.window.showInformationMessage(`Method ${methodName} started with ID: ${methodId}`);
-        } catch (error) {
-            vscode.window.showErrorMessage(`Failed to run method: ${error}`);
-        }
-
-        
-        
     });
+    
+    async function selectMethodName(): Promise<string | undefined> {
+        const methodNames = await orcaApi.getMethodNames();
+        if (!methodNames || methodNames.length === 0) {
+            vscode.window.showErrorMessage('No method recipes found.');
+            return undefined;
+        }
+    
+        return vscode.window.showQuickPick(methodNames, { placeHolder: 'Select the method to run' });
+    }
+    async function getLocationMap(labwares: string[], locations: string[], locationType: 'START' | 'END'): Promise<Record<string, string> | undefined> {
+        const locationMap: Record<string, string> = {};
+    
+        for (const labware of labwares) {
+            const location = await vscode.window.showQuickPick(locations, { placeHolder: `Select the ${locationType} location for ${labware}` });
+            if (!location) {
+                return undefined;
+            }
+            locationMap[labware] = location;
+        }
+    
+        return locationMap;
+    }
+    
 
     try{
-        vscode.window.registerTreeDataProvider("orca-ide.workflows-view", new OrcaSideViewProvider(orcaApi));
-        vscode.window.registerTreeDataProvider("orca-ide.methods-view", new OrcaSideViewProvider(orcaApi));
+        vscode.window.registerTreeDataProvider("orca-ide.workflows-view", new WorkflowTreeViewProvider(orcaApi));
+        vscode.window.registerTreeDataProvider("orca-ide.methods-view", new MethodTreeViewProvider(orcaApi));
     }catch (error) {
         vscode.window.showErrorMessage(`Failed to start Orca server: ${error}`);        
     }

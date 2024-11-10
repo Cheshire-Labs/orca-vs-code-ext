@@ -25,7 +25,8 @@
       {
         "title": "Load Orca Configuration",
         "category": "Orca",
-        "command": "orca-ide.loadYaml"
+        "command": "orca-ide.loadYaml",
+        "icon": "$(cloud-upload)"
       },
       {
         "title": "Initialize Resources",
@@ -35,12 +36,14 @@
       {
         "title": "Run Workflow",
         "category": "Orca",
-        "command": "orca-ide.runWorkflow"
+        "command": "orca-ide.runWorkflow",
+        "icon": "$(play)"
       },
       {
         "title": "Run Method",
         "category": "Orca",
-        "command": "orca-ide.runMethod"
+        "command": "orca-ide.runMethod",
+        "icon": "$(play)"
       },
       {
         "title": "Start Server",
@@ -65,7 +68,7 @@
         {
           "command": "orca-ide.loadYaml",
           "group": "navigation",
-          "when": "view == orca-ide.side-view"
+          "when": "view == orca-ide.workflows-view || view == orca-ide.methods-view"
         }
       ],
       
