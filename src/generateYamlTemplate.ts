@@ -99,7 +99,7 @@ export function generateYamlTemplate() {
     }
 
     const workspaceDir = workspaceFolders[0].uri.fsPath; // Use the first workspace folder
-    const filePath = path.join(workspaceDir, 'config-template.yaml');
+    const filePath = path.join(workspaceDir, 'config-template.orca.yaml');
 
     // Save the YAML file to the VS Code workspace directory
     fs.writeFileSync(filePath, yamlConfig, 'utf8');

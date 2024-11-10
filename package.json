@@ -41,8 +41,71 @@
         "title": "Run Method",
         "category": "Orca",
         "command": "orca-ide.runMethod"
+      },
+      {
+        "title": "Start Server",
+        "category": "Orca",
+        "command": "orca-ide.startServer"
+      },
+      {
+        "title": "Stop Server",
+        "category": "Orca",
+        "command": "orca-ide.stopServer"
       }
-    ]
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "orca-ide.loadYaml",
+          "group": "navigation",
+          "when": "editorLangId == yaml"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "orca-ide.loadYaml",
+          "group": "navigation",
+          "when": "view == orca-ide.side-view"
+        }
+      ],
+      
+      "view/item/context": [
+        {
+          "command": "orca-ide.runWorkflow",
+          "when": "viewItem == workflow",
+          "group": "inline"
+        },
+        {
+          "command": "orca-ide.runMethod",
+          "when": "viewItem == method",
+          "group": "inline"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "orca-activity-bar",
+          "title": "Orca",
+          "icon": "src/images/orca-vscode-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "orca-activity-bar": [
+        {
+          "id": "orca-ide.workflows-view",
+          "name": "Orca Workflows",
+          "icon": "src/images/orca-vscode-icon.svg"
+        },
+        {
+          "id": "orca-ide.methods-view",
+          "name": "Orca Methods",
+          "icon": "src/images/orca-vscode-icon.svg"
+        }
+      ]
+    }
+    
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
