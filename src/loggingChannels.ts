@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-export class loggingChannels {
+export class LoggingChannels {
     private orcaOutputChannel = vscode.window.createOutputChannel("Orca Logs");
     private orcaServerOutputChannel = vscode.window.createOutputChannel("Orca Server Logs");
     private extensionOutputChannel = vscode.window.createOutputChannel("Orca Extension Logs");
@@ -18,5 +18,14 @@ export class loggingChannels {
     }
     extensionLog(message: string) {
         this.extensionOutputChannel.appendLine(message);
+    }
+    showOrcaLogs(){
+        this.orcaOutputChannel.show();
+    }
+    showOrcaServerLogs(){
+        this.orcaServerOutputChannel.show();
+    }
+    showExtensionLogs(){
+        this.extensionOutputChannel.show();
     }
 }

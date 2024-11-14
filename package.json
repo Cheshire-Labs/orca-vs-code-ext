@@ -54,6 +54,12 @@
         "title": "Stop Server",
         "category": "Orca",
         "command": "orca-ide.stopServer"
+      },
+      {
+        "title": "Stop",
+        "category": "Orca",
+        "command": "orca-ide.stop",
+        "icon": "$(primitive-square)"
       }
     ],
     "menus": {
@@ -67,6 +73,11 @@
       "view/title": [
         {
           "command": "orca-ide.loadYaml",
+          "group": "navigation",
+          "when": "view == orca-ide.workflows-view || view == orca-ide.methods-view"
+        },
+        {
+          "command": "orca-ide.stop",
           "group": "navigation",
           "when": "view == orca-ide.workflows-view || view == orca-ide.methods-view"
         }
