@@ -1,18 +1,16 @@
 import * as vscode from 'vscode';
 import { exec, ChildProcess } from 'child_process';
 import { io, Socket } from 'socket.io-client';
-import { loggingChannels } from './loggingChannels';
-import { fileURLToPath } from 'url';
-
-
+import { LoggingChannels } from './loggingChannels';
+import { json } from 'stream/consumers';
 
 
 class LoggingSocketHandler {    
     logging_url: string;
     logging_socket: Socket | null = null;
-    logger: loggingChannels;
+    logger: LoggingChannels;
 
-    constructor(logging_url: string, logger: loggingChannels) {
+    constructor(logging_url: string, logger: LoggingChannels) {
         this.logger = logger;
         this.logging_url = logging_url;        
     }
@@ -21,7 +19,12 @@ class LoggingSocketHandler {
            return; 
         }
         if (this.logging_socket === null) {
-            this.logging_socket = io(this.logging_url);
+            this.logging_socket = io(this.logging_url); //{
+            //     path: "/socket.io",
+            //     transports: ["websocket"],
+            //     reconnection: true,
+            //     withCredentials: true,
+            // });
         }
         this.setupLoggingSocket(this.logging_socket);
         this.logging_socket?.connect();        
@@ -42,10 +45,15 @@ class LoggingSocketHandler {
             vscode.window.showInformationMessage('Connected to Orca logs');
         });
 
-        socket.on('log_message', (message) => {
-            if (message && message.data) {
-                this.logger.orcaLog(message.data);
-            }
+        socket.on('logMessage', (...args) => {
+            vscode.window.showInformationMessage('Message Received');
+            this.logger.extensionLog('Message Received');
+            const message = args[0];
+            this.logger.orcaLog(message["data"]);
+            // args.forEach((arg, index) => {
+            //     this.logger.orcaLog(`Argument ${index}: ${JSON.stringify(arg, null, 2)}`);
+            // });
+
         });
 
         socket.on('disconnect', () => {
@@ -54,10 +62,16 @@ class LoggingSocketHandler {
             this.logging_socket = null;
         });
 
+        // socket.onAny((event, ...args) => {
+        //     vscode.window.showInformationMessage('Message Received');
+        //     this.logger.extensionLog(`Received event: ${event}, with args: ${JSON.stringify(args)}`);
+        // });
+
         socket.on('connect_error', (error) => {
             this.logger.extensionLog(`Socket.IO connection error: ${error}`);
             vscode.window.showErrorMessage('Error connecting to Orca logs');
         });
+
         this.logger.extensionLog('Socket.IO setup complete');
     }
 }
@@ -66,10 +80,10 @@ class LoggingSocketHandler {
 class OrcaServerHandler {
 
    private url: string;
-   private logger: loggingChannels;
+   private logger: LoggingChannels;
    private orcaProcess: ChildProcess | null = null;
    
-   constructor(url: string = 'http://127.0.0.1:5000', logger: loggingChannels) {
+   constructor(url: string = 'http://127.0.0.1:5000', logger: LoggingChannels) {
     this.url = url;   
     this.logger = logger;
    }
@@ -156,7 +170,7 @@ class OrcaServerHandler {
 export class OrcaServer{
     loggingSocketHandler: LoggingSocketHandler;
     orcaServerHandler: OrcaServerHandler;
-    constructor(url: string = 'http://127.0.0.1:5000', vscodeLogs: loggingChannels, logging_url: string | null = null) {
+    constructor(url: string = 'http://127.0.0.1:5000', vscodeLogs: LoggingChannels, logging_url: string | null = null) {
         if (logging_url === null) {
             logging_url = `${url}/logging`;
         }

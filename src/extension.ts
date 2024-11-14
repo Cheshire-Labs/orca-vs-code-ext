@@ -1,14 +1,13 @@
 import * as vscode from 'vscode';
 import { generateYamlTemplate } from './generateYamlTemplate';
-import axios, { get } from 'axios'; 
-import { loggingChannels } from './loggingChannels';
+import { LoggingChannels } from './loggingChannels';
 import { OrcaServer } from './orcaServer';
 import { OrcaApi } from './orcaApi';
 import { WorkflowTreeViewProvider, MethodTreeViewProvider, WorkflowTreeItem, MethodTreeItem } from './sideview';
 
 
 let url: string = 'http://127.0.0.1:5000';
-let vscodeLogs: loggingChannels = new loggingChannels();
+let vscodeLogs: LoggingChannels = new LoggingChannels();
 let orcaServer = new OrcaServer(url, vscodeLogs);
 let orcaApi: OrcaApi = new OrcaApi(url, vscodeLogs);
 
@@ -41,12 +40,12 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Command to initialize resources
     let initializeCommand = vscode.commands.registerCommand('orca-ide.initialize', async () => {
-        try {
-			await axios.post(url + '/init');
-			vscode.window.showInformationMessage('Resources initialized successfully!');
-		} catch (error) {
-			vscode.window.showErrorMessage(`Failed to initialize resources: ${error}`);
-		}
+        const initialized: boolean = await orcaApi.initializeResources();
+        if (initialized) {
+            vscode.window.showInformationMessage('Finished Running initialization');
+        } else {
+            vscode.window.showErrorMessage('Failed to initialize resources');
+        }
     });
 
     // Command to run a workflow
@@ -57,15 +56,13 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
     
-        try {
-            const response = await axios.post(`${url}/run_workflow`, { workflow_name: workflowName });
-            const workflowId = response.data?.workflowId ?? 'Unknown ID';
-    
-            vscode.window.showInformationMessage(`Workflow "${workflowName}" started with ID: ${workflowId}`);
-        } catch (error: any) {
-            const errorMessage = error?.message ?? 'Unknown error';
-            vscode.window.showErrorMessage(`Failed to run workflow: ${errorMessage}`);
-        }
+        const workflowId = await orcaApi.runWorkflow(workflowName);
+        if (!workflowId) {
+            vscode.window.showErrorMessage('Failed to run workflow');
+            return;
+        }    
+        vscode.window.showInformationMessage(`Workflow "${workflowName}" started with ID: ${workflowId}`);
+        vscodeLogs.showOrcaLogs();
     });
     
 
@@ -119,19 +116,13 @@ export function activate(context: vscode.ExtensionContext) {
         }
     
         // Run the method
-        try {
-            const response = await axios.post(`${url}/run_method`, {
-                method_name: methodName,
-                start_map: JSON.stringify(startMap),
-                end_map: JSON.stringify(endMap),
-            });
-    
-            const methodId = response.data?.methodId ?? 'Unknown ID';
-            vscode.window.showInformationMessage(`Method "${methodName}" started with ID: ${methodId}`);
-        } catch (error: any) {
-            const errorMessage = error?.message ?? 'Unknown error';
-            vscode.window.showErrorMessage(`Failed to run method: ${errorMessage}`);
+        const methodId = await orcaApi.runMethod(methodName, startMap, endMap);
+        if (!methodId) {
+            vscode.window.showErrorMessage('Failed to run method');
+            return;
         }
+        vscode.window.showInformationMessage(`Method "${methodName}" started with ID: ${methodId}`);
+        vscodeLogs.showOrcaLogs();
     });
     
     async function selectMethodName(): Promise<string | undefined> {
@@ -156,6 +147,14 @@ export function activate(context: vscode.ExtensionContext) {
     
         return locationMap;
     }
+    const stopCommand = vscode.commands.registerCommand('orca-ide.stop', async () => {
+        const stop_message = await orcaApi.stop();
+        if (!stop_message) {
+            vscode.window.showErrorMessage('Failed to stop Orca server');
+            return;
+        }
+        vscode.window.showInformationMessage('Orca server stopped successfully!');
+    });
     
 
     try{
@@ -172,7 +171,8 @@ export function activate(context: vscode.ExtensionContext) {
 		loadYamlCommand, 
 		initializeCommand, 
 		runWorkflowCommand, 
-		runMethodCommand);
+		runMethodCommand,
+        stopCommand);
     
     console.log('Extension "orca-ide" is now active!');
 

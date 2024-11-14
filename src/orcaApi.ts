@@ -1,9 +1,9 @@
-import * as vscode from 'vscode';
-import { loggingChannels } from './loggingChannels';
+import { LoggingChannels } from './loggingChannels';
 import axios from 'axios';
+import * as vscode from 'vscode';
 
 export class OrcaApi {
-    private logger: loggingChannels;
+    private logger: LoggingChannels;
     private url: string;
     private _configLoaded: boolean = false;
     private onConfigLoaded = new vscode.EventEmitter<boolean>();
@@ -11,7 +11,7 @@ export class OrcaApi {
         this.onConfigLoaded.fire(value);
         this._configLoaded = value;
     }
-    constructor(orcaUrl: string, logger: loggingChannels) {
+    constructor(orcaUrl: string, logger: LoggingChannels) {
         this.url = orcaUrl;
         this.logger = logger;
     }
@@ -32,27 +32,35 @@ export class OrcaApi {
         this.logger.extensionLog(`Loading YAML file: ${configFilePath}`);
         try {
             await axios.post(this.url + '/load', {
-                config_file: configFilePath
+                configFile: configFilePath
             });
             
         } catch (error) {
             this.configLoaded = false;
             this.logger.extensionLog(`Failed to load Orca: ${error}`);
-            vscode.window.showErrorMessage(`Failed to load Orca: ${error}`);
             return;
         }
         this.configLoaded = true;
-        vscode.window.showInformationMessage(`Loaded YAML file: ${configFilePath}`);
         this.logger.extensionLog(`Loaded YAML file: ${configFilePath}`);
 
+    }
+
+    async initializeResources(): Promise<boolean> {
+        try {
+            await axios.post(this.url + '/init');
+            return true;
+        } catch (error) {
+            this.logger.extensionLog(`Failed to initialize resources: ${error}`);
+            return false;
+        }
     }
 
     async getWorkflowRecipes(): Promise<Record<string, any> | undefined> {
         try{
             const response = await axios.get(this.url + '/get_workflow_recipes');
-            return response.data["workflow_recipes"];
+            return response.data["workflowRecipes"];
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to get workflows: ${error}`);
+            this.logger.extensionLog(`Failed to get workflows: ${error}`);
             return undefined;
         }
     }
@@ -69,9 +77,9 @@ export class OrcaApi {
     async getMethodRecipes(): Promise<Record<string, any> | undefined> {
         try{
             const response = await axios.get(this.url + '/get_method_recipes');
-            return response.data["method_recipes"];
+            return response.data["methodRecipes"];
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to get methods: ${error}`);
+            this.logger.extensionLog(`Failed to get methods: ${error}`);
             return undefined;
         }
     }
@@ -86,26 +94,20 @@ export class OrcaApi {
 
     async getMethodRecipeInputLabwares(methodName: string): Promise<string[] | undefined> {
         try{
-            const response = await axios.get(`${this.url}/get_method_recipe_input_labwares`,{
-                params: {
-                    method_name: methodName
-                }});
-            return response.data["input_labwares"];
+            const response = await axios.get(`${this.url}/get_method_recipe_input_labwares/${methodName}`);
+            return response.data["inputLabwares"];
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to get input labwares for method recipe ${methodName}: ${error}`);
+            this.logger.extensionLog(`Failed to get input labwares for method recipe ${methodName}: ${error}`);
             return undefined;
         }
     }
 
     async getMethodRecipeOutputLabwares(methodName: string): Promise<string[] | undefined> {
         try{
-            const response = await axios.get(`${this.url}/get_method_recipe_output_labwares`, {
-            params: {
-                method_name: methodName
-            }});
-            return response.data["output_labwares"];
+            const response = await axios.get(`${this.url}/get_method_recipe_output_labwares/${methodName}`);
+            return response.data["outputLabwares"];
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to get output labwares for method recipe ${methodName}: ${error}`);
+            this.logger.extensionLog(`Failed to get output labwares for method recipe ${methodName}: ${error}`);
             return undefined;
         }
     }
@@ -113,9 +115,9 @@ export class OrcaApi {
     async getLabwareNames(): Promise<string[] | undefined> {
         try{
             const response = await axios.get(this.url + '/get_labware_recipes');
-            return response.data["labware_recipes"];
+            return response.data["labwareRecipes"];
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to get labware names: ${error}`);
+            this.logger.extensionLog(`Failed to get labware names: ${error}`);
             return undefined;
         }
     }
@@ -125,7 +127,45 @@ export class OrcaApi {
             const response = await axios.get(this.url + '/get_locations');
             return response.data["locations"];
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to get location names: ${error}`);
+            this.logger.extensionLog(`Failed to get location names: ${error}`);
+            return undefined;
+        }
+    }
+
+    async runWorkflow(workflowName: string): Promise<string | undefined> {
+        try{
+            const response = await axios.post(this.url + '/run_workflow', {
+                workflowName: workflowName
+            });
+            
+            return response.data["workflowId"];
+        } catch (error) {
+            this.logger.extensionLog(`Failed to run workflow: ${error}`);
+            return undefined;  
+        }
+    }
+
+    async runMethod(methodName: string, startMap: Record<string, string>, endMap: Record<string, string>): Promise<string | undefined> {
+        try{
+            const response = await axios.post(this.url + '/run_method', {
+                methodName: methodName,
+                startMap: JSON.stringify(startMap),
+                endMap: JSON.stringify(endMap),
+            });
+            this.logger.extensionLog(`${response.data["methodId"]}`);
+            return response.data["methodId"];
+        } catch (error) {
+            this.logger.extensionLog(`Failed to run method: ${error}`);
+            return undefined;
+        }
+    }
+
+    async stop(): Promise<string | undefined> {
+        try{
+            const response = await axios.get(this.url + '/stop');
+            return response.data["message"];
+        } catch (error) {
+            this.logger.extensionLog(`Failed to stop Orca: ${error}`);
             return undefined;
         }
     }
@@ -135,7 +175,7 @@ export class OrcaApi {
             const response = await axios.get(this.url + '/shutdown');
             return response.data["message"];
         } catch (error) {
-            vscode.window.showErrorMessage(`Failed to shutdown Orca: ${error}`);
+            this.logger.extensionLog(`Failed to shutdown Orca: ${error}`);
             return undefined;
         }
     }
