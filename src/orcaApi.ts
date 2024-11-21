@@ -2,6 +2,7 @@ import { LoggingChannels } from './loggingChannels';
 import axios from 'axios';
 import * as vscode from 'vscode';
 
+
 export class OrcaApi {
     private logger: LoggingChannels;
     private url: string;
@@ -163,7 +164,8 @@ export class OrcaApi {
     async getAvailableDrivers(): Promise<string[] | undefined> {
         try{
             const response = await axios.get(this.url + '/get_available_drivers');
-            return response.data["availableDrivers"];
+            const driver_infos: Record<string, any> = response.data["availableDriversInfo"];
+            return Object.keys(driver_infos);
         } catch (error) {
             this.logger.extensionLog(`Failed to get available drivers: ${error}`);
             return undefined;
@@ -173,7 +175,8 @@ export class OrcaApi {
     async getInstalledDrivers(): Promise<string[] | undefined> {
         try{
             const response = await axios.get(this.url + '/get_installed_drivers');
-            return response.data["installedDrivers"];
+            const driver_infos: Record<string, any> = response.data["installedDriversInfo"];
+            return Object.keys(driver_infos);
         } catch (error) {
             this.logger.extensionLog(`Failed to get installed drivers: ${error}`);
             return undefined;
