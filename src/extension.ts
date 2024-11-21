@@ -156,6 +156,50 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage('Orca server stopped successfully!');
     });
     
+    const installDriverCommand = vscode.commands.registerCommand('orca-ide.installDriver', async (driverName?: string) => {
+        if (!driverName) {
+            const availableDrivers = await orcaApi.getAvailableDrivers();
+            if (!availableDrivers || availableDrivers.length === 0) {
+                vscode.window.showErrorMessage('No drivers available for installation.');
+                return;
+            }
+            driverName = await vscode.window.showQuickPick(availableDrivers, { placeHolder: 'Select the driver to install' });
+            if (!driverName) {
+                return;
+            }
+        }
+        await orcaApi.installDriver(driverName);
+        vscode.window.showInformationMessage(`Driver '${driverName}' installed successfully.`);
+    });
+
+    const installDriverFromRepoCommand = vscode.commands.registerCommand('orca-ide.installDriverFromRepo', async () => {
+        const driverName = await vscode.window.showInputBox({ placeHolder: 'Enter the name of the driver to install' });
+        if (!driverName) {
+            return;
+        }
+        const driverRepoUrl = await vscode.window.showInputBox({ placeHolder: 'Enter the repository URL of the driver' });
+        if (!driverRepoUrl) {
+            return;
+        }
+        await orcaApi.installDriver(driverName, driverRepoUrl);
+        vscode.window.showInformationMessage(`Driver '${driverName}' installed successfully.`);
+    });
+
+    const uninstallDriverCommand = vscode.commands.registerCommand('orca-ide.uninstallDriver', async (driverName?: string) => {
+        if (!driverName) {
+            const installedDrivers = await orcaApi.getInstalledDrivers();
+            if (!installedDrivers || installedDrivers.length === 0) {
+                vscode.window.showErrorMessage('No drivers installed.');
+                return;
+            }
+            driverName = await vscode.window.showQuickPick(installedDrivers, { placeHolder: 'Select the driver to uninstall' });
+            if (!driverName) {
+                return;
+            }
+        }
+        await orcaApi.uninstallDriver(driverName);
+        vscode.window.showInformationMessage(`Driver '${driverName}' uninstalled successfully.`);
+    });
 
     try{
         vscode.window.registerTreeDataProvider("orca-ide.workflows-view", new WorkflowTreeViewProvider(orcaApi));
@@ -172,7 +216,10 @@ export function activate(context: vscode.ExtensionContext) {
 		initializeCommand, 
 		runWorkflowCommand, 
 		runMethodCommand,
-        stopCommand);
+        stopCommand,
+        installDriverCommand,
+        installDriverFromRepoCommand,
+        uninstallDriverCommand);
     
     console.log('Extension "orca-ide" is now active!');
 

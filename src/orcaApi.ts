@@ -160,6 +160,51 @@ export class OrcaApi {
         }
     }
 
+    async getAvailableDrivers(): Promise<string[] | undefined> {
+        try{
+            const response = await axios.get(this.url + '/get_available_drivers');
+            return response.data["availableDrivers"];
+        } catch (error) {
+            this.logger.extensionLog(`Failed to get available drivers: ${error}`);
+            return undefined;
+        }
+    }
+
+    async getInstalledDrivers(): Promise<string[] | undefined> {
+        try{
+            const response = await axios.get(this.url + '/get_installed_drivers');
+            return response.data["installedDrivers"];
+        } catch (error) {
+            this.logger.extensionLog(`Failed to get installed drivers: ${error}`);
+            return undefined;
+        }
+    }
+
+    async installDriver(driverName: string, driverRepoUrl?: string): Promise<string | undefined> {
+        try{
+            const response = await axios.post(this.url + '/install_driver', {
+                driverName: driverName,
+                driverRepoUrl: driverRepoUrl
+            });
+            return response.data["message"];
+        } catch (error) {
+            this.logger.extensionLog(`Failed to install driver: ${error}`);
+            return undefined;
+        }
+    }
+
+    async uninstallDriver(driverName: string): Promise<string | undefined> {
+        try{
+            const response = await axios.post(this.url + '/uninstall_driver', {
+                driverName: driverName
+            });
+            return response.data["message"];
+        } catch (error) {
+            this.logger.extensionLog(`Failed to uninstall driver: ${error}`);
+            return undefined;
+        }
+    }
+
     async stop(): Promise<string | undefined> {
         try{
             const response = await axios.get(this.url + '/stop');
