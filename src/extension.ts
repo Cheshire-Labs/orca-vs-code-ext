@@ -29,12 +29,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Command to load a YAML file in Orca and initialize
 	let loadYamlCommand = vscode.commands.registerCommand('orca-ide.loadYaml', async () => {
-        const filePath = "C:\\Users\\miike\\source\\repos\\orca\\orca-core\\examples\\smc_assay\\smc_assay_example.orca.yml";
         await orcaServer.startOrcaServer();
-        // await waitforhost(url);
-        // const filePath = await vscode.window.showInputBox({ placeHolder: 'Enter the path to the YAML file' });
-        if (filePath) {
-            await orcaApi.loadOrcaConfig(filePath);
+        const dialogUri = await vscode.window.showOpenDialog({ title: 'Enter the path to the YAML file', canSelectFiles: true, canSelectFolders: false, canSelectMany: false, filters: {  'YAML Files': ['orca.yml', 'orca.yaml', 'yml', 'yaml'] }});
+        if (dialogUri && dialogUri.length === 1) {
+            const filepath = dialogUri[0].fsPath;
+            await orcaApi.loadOrcaConfig(filepath);
         }
     });
 
