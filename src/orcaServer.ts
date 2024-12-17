@@ -19,7 +19,12 @@ class LoggingSocketHandler {
            return; 
         }
         if (this.logging_socket === null) {
-            this.logging_socket = io(this.logging_url); //{
+            this.logging_socket = io(this.logging_url, {
+                reconnectionAttempts: 5,
+                reconnectionDelay: 2000,  // waits 2 seconds to decrease number of errors
+                timeout: 10000
+            });
+            //{
             //     path: "/socket.io",
             //     transports: ["websocket"],
             //     reconnection: true,
@@ -68,7 +73,11 @@ class LoggingSocketHandler {
         // });
 
         socket.on('connect_error', (error) => {
-            vscode.window.showErrorMessage('Error connecting to Orca logs');
+            if (!error.message.includes('xhr poll error')) {
+                this.logger.extensionLog(`Socket.IO connect error: ${error.message}`);
+
+            }
+            vscode.window.showWarningMessage('Connecting to Orca logs...');
         });
 
         this.logger.extensionLog('Socket.IO setup complete');
