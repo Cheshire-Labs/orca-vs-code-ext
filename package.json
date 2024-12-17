@@ -82,7 +82,6 @@
           "when": "view == orca-ide.workflows-view || view == orca-ide.methods-view"
         }
       ],
-      
       "view/item/context": [
         {
           "command": "orca-ide.runWorkflow",
@@ -118,8 +117,22 @@
           "icon": "src/images/orca-vscode-icon.svg"
         }
       ]
+    },
+    "configuration": {
+      "title": "Orca",
+      "properties": {
+        "orca.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to the Python interpreter in Orca environment"
+        },
+        "orca.scriptPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the Orca REST API script"
+        }
+      }
     }
-    
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -143,7 +156,7 @@
     "@vscode/test-electron": "^2.4.0",
     "eslint": "^8.57.0",
     "ts-loader": "^9.5.1",
-    "typescript": "^5.4.5",
+    "typescript": "^5.7.2",
     "webpack": "^5.92.1",
     "webpack-cli": "^5.1.4"
   },
