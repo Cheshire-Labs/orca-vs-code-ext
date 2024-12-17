@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { exec, ChildProcess } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import { io, Socket } from 'socket.io-client';
 import { LoggingChannels } from './loggingChannels';
 import { json } from 'stream/consumers';
@@ -19,7 +19,12 @@ class LoggingSocketHandler {
            return; 
         }
         if (this.logging_socket === null) {
-            this.logging_socket = io(this.logging_url); //{
+            this.logging_socket = io(this.logging_url, {
+                reconnectionAttempts: 5,
+                reconnectionDelay: 2000,  // waits 2 seconds to decrease number of errors
+                timeout: 10000
+            });
+            //{
             //     path: "/socket.io",
             //     transports: ["websocket"],
             //     reconnection: true,
@@ -68,8 +73,11 @@ class LoggingSocketHandler {
         // });
 
         socket.on('connect_error', (error) => {
-            this.logger.extensionLog(`Socket.IO connection error: ${error}`);
-            vscode.window.showErrorMessage('Error connecting to Orca logs');
+            if (!error.message.includes('xhr poll error')) {
+                this.logger.extensionLog(`Socket.IO connect error: ${error.message}`);
+
+            }
+            vscode.window.showWarningMessage('Connecting to Orca logs...');
         });
 
         this.logger.extensionLog('Socket.IO setup complete');
@@ -97,29 +105,48 @@ class OrcaServerHandler {
         }
         
         // TODO: fix paths
-        const pythonPath = `C:\\Users\\miike\\source\\repos\\orca\\orca-core\\.venv\\Scripts\\python`;
-        const scriptPath = `C:\\Users\\miike\\source\\repos\\orca\\orca-core\\src\\orca\\cli\\orca_rest_api.py`;
-        
+        const config = vscode.workspace.getConfiguration('orca');
+        const pythonPath = config.get('pythonPath');
+        const scriptPath = config.get('scriptPath');
+
+        if (!pythonPath) {
+            throw new Error('Python path not set, using default path: python');
+        }
+        if (!scriptPath) {
+            throw new Error('Script path not set');
+        }
+
         this.logger.extensionLog(`Starting Orca server...`);
-        this.orcaProcess = await exec(`${pythonPath} ${scriptPath}`);
+        this.logger.extensionLog(`Python path: ${pythonPath}`);
+        this.logger.extensionLog(`Script path: ${scriptPath}`);
+
+        
+        try {
+            this.orcaProcess = spawn(`${pythonPath} ${scriptPath}`, {
+                shell: true,
+            });
+            
+            this.orcaProcess.stdout?.on("data", (data: string) => {
+                this.logger.serverLog(data);
+            });
+            this.orcaProcess.stderr?.on("data", (data: string) => {
+                this.logger.serverLog(data);
+            });
+            
+            this.orcaProcess.on("error", (error) => {
+                this.logger.serverLog(`Failed to start Orca server: ${error.message}`);
+                vscode.window.showErrorMessage(`Failed to start Orca server: ${error.message}`);
+                this.orcaProcess = null;
+            });
     
-        this.orcaProcess.stdout?.on("data", (data: string) => {
-            this.logger.serverLog(data);
-         });
-         this.orcaProcess.stderr?.on("data", (data: string) => {
-            this.logger.serverLog(data);
-        });
-        // this.orcaProcess.on("exit", (code, signal) => {
-        //     const exitMessage = `Orca server exited with code ${code} and signal ${signal}`;
-        //     this.logger.serverLog(exitMessage);
-        //     this.logger.extensionLog(exitMessage);
-        //     vscode.window.showInformationMessage('Orca server stopped.');
-        //     this.orcaProcess = null;
-        //  });
-        // process.on('exit', () => this.stopOrcaServer());
-        // process.on('SIGINT', () => this.stopOrcaServer());
-        // process.on('SIGTERM', () => this.stopOrcaServer());
-        this.logger.extensionLog(`Orca server started.`);
+            this.logger.extensionLog(`Orca server started.`);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            this.logger.serverLog(`Failed to start Orca server: ${errorMessage}`);
+            vscode.window.showErrorMessage(`Failed to start Orca server: ${errorMessage}`);
+            this.orcaProcess = null;
+            throw error;
+        }
     }
     stopOrcaServer() {
         if (this.orcaProcess) {
