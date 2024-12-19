@@ -148,13 +148,28 @@ class OrcaServerHandler {
             throw error;
         }
     }
-    stopOrcaServer() {
+    async stopOrcaServer() {
         if (this.orcaProcess) {
-            fetch(`${this.url}/shutdown`).then(response => this.logger.extensionLog(`Orca server shutdown: ${response.status}`));
-            this.orcaProcess.kill();
-            // this.orcaProcess.stdin?.end();
-            this.orcaProcess = null;
+            try {
+                const response = await fetch(`${this.url}/shutdown`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                this.logger.extensionLog(`Orca server shutdown: ${response.status}`);
+
+                if (!response.ok) {
+                    this.logger.extensionLog(`HTTP error, status: ${response.status}`);
+                }
+ 
+                this.orcaProcess = null;
             vscode.window.showInformationMessage('Orca server stopped.');
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                this.logger.extensionLog(`Failed to stop Orca server: ${errorMessage}`);
+                vscode.window.showErrorMessage(`Failed to stop Orca server`);
+            }
         } else {
             vscode.window.showWarningMessage('Orca server is not running.');
         }
