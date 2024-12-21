@@ -12,6 +12,12 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+"yaml.schemas": [
+      {
+        "fileMatch": "*.orca.yml",
+        "url": "./src/yaml_schema/orca_schema.json"
+      }
+    ],
     "commands": [
       {
         "command": "orca-ide.helloWorld",
