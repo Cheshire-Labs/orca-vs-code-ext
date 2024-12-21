@@ -24,12 +24,6 @@ class LoggingSocketHandler {
                 reconnectionDelay: 2000,  // waits 2 seconds to decrease number of errors
                 timeout: 10000
             });
-            //{
-            //     path: "/socket.io",
-            //     transports: ["websocket"],
-            //     reconnection: true,
-            //     withCredentials: true,
-            // });
         }
         this.setupLoggingSocket(this.logging_socket);
         this.logging_socket?.connect();        
@@ -55,9 +49,6 @@ class LoggingSocketHandler {
             this.logger.extensionLog('Message Received');
             const message = args[0];
             this.logger.orcaLog(message["data"]);
-            // args.forEach((arg, index) => {
-            //     this.logger.orcaLog(`Argument ${index}: ${JSON.stringify(arg, null, 2)}`);
-            // });
 
         });
 
@@ -66,11 +57,6 @@ class LoggingSocketHandler {
             this.logger.extensionLog('Socket.IO disconnected');
             this.logging_socket = null;
         });
-
-        // socket.onAny((event, ...args) => {
-        //     vscode.window.showInformationMessage('Message Received');
-        //     this.logger.extensionLog(`Received event: ${event}, with args: ${JSON.stringify(args)}`);
-        // });
 
         socket.on('connect_error', (error) => {
             if (!error.message.includes('xhr poll error')) {
