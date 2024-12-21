@@ -104,25 +104,15 @@ class OrcaServerHandler {
             return;
         }
         
-        // TODO: fix paths
         const config = vscode.workspace.getConfiguration('orca');
-        const pythonPath = config.get('pythonPath');
-        const scriptPath = config.get('scriptPath');
-
-        if (!pythonPath) {
-            throw new Error('Python path not set, using default path: python');
-        }
-        if (!scriptPath) {
-            throw new Error('Script path not set');
-        }
+        const orcaCommand = process.env.ORCA_PATH || "orca";
 
         this.logger.extensionLog(`Starting Orca server...`);
-        this.logger.extensionLog(`Python path: ${pythonPath}`);
-        this.logger.extensionLog(`Script path: ${scriptPath}`);
+        this.logger.extensionLog(`Orca command: ${orcaCommand}`);
 
         
         try {
-            this.orcaProcess = spawn(`${pythonPath} ${scriptPath}`, {
+            this.orcaProcess = spawn(`${orcaCommand}`, ["server"], {
                 shell: true,
             });
             
