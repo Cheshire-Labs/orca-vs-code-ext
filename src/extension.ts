@@ -3,7 +3,7 @@ import { generateYamlTemplate } from './generateYamlTemplate';
 import { LoggingChannels } from './loggingChannels';
 import { OrcaServer } from './orcaServer';
 import { OrcaApi } from './orcaApi';
-import { WorkflowTreeViewProvider, MethodTreeViewProvider, WorkflowTreeItem, MethodTreeItem } from './sideview';
+import { WorkflowTreeViewProvider, MethodTreeViewProvider, InstalledDriversTreeViewProvider, WorkflowTreeItem, MethodTreeItem } from './sideview';
 
 
 let url: string = 'http://127.0.0.1:5000';
@@ -203,6 +203,7 @@ export function activate(context: vscode.ExtensionContext) {
     try{
         vscode.window.registerTreeDataProvider("orca-ide.workflows-view", new WorkflowTreeViewProvider(orcaApi));
         vscode.window.registerTreeDataProvider("orca-ide.methods-view", new MethodTreeViewProvider(orcaApi));
+        vscode.window.registerTreeDataProvider("orca-ide.installed-drivers-view", new InstalledDriversTreeViewProvider(orcaServer, orcaApi));
     }catch (error) {
         vscode.window.showErrorMessage(`Failed to start Orca server: ${error}`);        
     }

@@ -12,8 +12,5 @@
 	},
 	// Turn off tsc task auto detection since we have the necessary tasks as npm scripts
 	"typescript.tsc.autoDetect": "off",
-	"yaml.schemas": {
-		"C:\\Users\\miike\\source\\repos\\orca\\orca-ide\\src\\yaml_schema\\orca_schema.json": "*.orca.yml"
-	},
-	"python.defaultInterpreterPath": "C:\\Users\\miike\\source\\repos\\orca\\orca-ide\\.venv\\Scripts\\python"
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python"
 }

@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { OrcaApi } from './orcaApi';
+import { time } from 'console';
+import { OrcaServer } from './orcaServer';
 
 export class WorkflowTreeViewProvider implements vscode.TreeDataProvider<WorkflowTreeItem> {
     private orcaApi: OrcaApi;
@@ -112,6 +114,137 @@ export class MethodTreeViewProvider implements vscode.TreeDataProvider<MethodTre
         } catch (error) {
             vscode.window.showErrorMessage(`Error getting methods: ${error}`);
         }
+    }
+}
+
+export class InstalledDriversTreeViewProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+    private orcaApi: OrcaApi;
+    private orcaServer: OrcaServer;
+    private installedDrivers: DriverTreeItem[] = [];
+    private isApiConnectable: boolean = false;
+    private _onDidChangeTreeData: vscode.EventEmitter<DriverTreeItem | undefined | null | void> = new vscode.EventEmitter<MethodTreeItem | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<MethodTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
+
+    constructor(orcaServer: OrcaServer, orcaApi: OrcaApi) {
+        this.orcaApi = orcaApi;
+        this.orcaServer = orcaServer;
+        this.orcaServer.subscribeOnIsConnectable(this.onOrcaApiConnectable.bind(this));
+    }
+
+    getTreeItem(element: DriverTreeItem): vscode.TreeItem {
+        return element;
+    }
+
+    getChildren(element?: DriverTreeItem): vscode.ProviderResult<DriverTreeItem[]> {
+        if (!element) {
+            if (!this.isApiConnectable) {
+                return [new DriverTreeItem('Start Orca Server to see installed drivers')];
+            }
+            return this.installedDrivers;
+        } else {
+            return [];
+        }
+    }
+
+    onOrcaApiConnectable(isConnectable: boolean) {
+        this.isApiConnectable = isConnectable;
+        this.refreshTree();
+    }
+
+    async refreshTree(): Promise<void> {
+        try {
+            console.log('Refreshing drivers ', this.isApiConnectable  );
+            if (this.isApiConnectable ) {
+                
+                await this.getInstalledDrivers();
+                this._onDidChangeTreeData.fire();
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error refreshing methods: ${error}`);
+        }
+    }
+
+    private async getInstalledDrivers(): Promise<void> {
+        try {
+            this.installedDrivers = [];
+            const driverNames = await this.orcaApi.getInstalledDrivers();
+            if (Array.isArray(driverNames)) {
+                this.installedDrivers = driverNames.map(name => new DriverTreeItem(name));
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error getting installed drivers: ${error}`);
+        }
+    }
+
+}
+
+export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+    private orcaApi: OrcaApi;
+    private orcaServer: OrcaServer;
+    private availableDrivers: DriverTreeItem[] = [];
+    private isApiConnectable: boolean = false;
+    private _onDidChangeTreeData: vscode.EventEmitter<DriverTreeItem | undefined | null | void> = new vscode.EventEmitter<MethodTreeItem | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<DriverTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
+
+    constructor(orcaServer: OrcaServer, orcaApi: OrcaApi) {
+        this.orcaApi = orcaApi;
+        this.orcaServer = orcaServer;
+        this.orcaServer.subscribeOnIsConnectable(this.onOrcaApiConnectable.bind(this));
+    }
+
+    getTreeItem(element: DriverTreeItem): vscode.TreeItem {
+        return element;
+    }
+
+    getChildren(element?: DriverTreeItem): vscode.ProviderResult<DriverTreeItem[]> {
+        if (!element) {
+            if (!this.isApiConnectable) {
+                return [new DriverTreeItem('Start Orca Server to see installed drivers')];
+            }
+            return this.availableDrivers;
+        } else {
+            return [];
+        }
+    }
+
+    onOrcaApiConnectable(isConnectable: boolean) {
+        this.isApiConnectable = isConnectable;
+        this.refreshTree();
+    }
+
+    async refreshTree(): Promise<void> {
+        try {
+            console.log('Refreshing drivers ', this.isApiConnectable  );
+            if (this.isApiConnectable ) {
+                
+                await this.getInstalledDrivers();
+                this._onDidChangeTreeData.fire();
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error refreshing methods: ${error}`);
+        }
+    }
+
+    private async getInstalledDrivers(): Promise<void> {
+        try {
+            this.availableDrivers = [];
+            const driverNames = await this.orcaApi.getInstalledDrivers();
+            if (Array.isArray(driverNames)) {
+                this.availableDrivers = driverNames.map(name => new DriverTreeItem(name));
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Error getting installed drivers: ${error}`);
+        }
+    }
+
+}
+
+export class DriverTreeItem extends vscode.TreeItem {
+    constructor(
+        public readonly label: string,
+        public readonly contextValue: string = 'driver'
+    ) {
+        super(label, vscode.TreeItemCollapsibleState.None);
     }
 }
 

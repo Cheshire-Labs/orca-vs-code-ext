@@ -24,12 +24,6 @@ class LoggingSocketHandler {
                 reconnectionDelay: 2000,  // waits 2 seconds to decrease number of errors
                 timeout: 10000
             });
-            //{
-            //     path: "/socket.io",
-            //     transports: ["websocket"],
-            //     reconnection: true,
-            //     withCredentials: true,
-            // });
         }
         this.setupLoggingSocket(this.logging_socket);
         this.logging_socket?.connect();        
@@ -55,9 +49,6 @@ class LoggingSocketHandler {
             this.logger.extensionLog('Message Received');
             const message = args[0];
             this.logger.orcaLog(message["data"]);
-            // args.forEach((arg, index) => {
-            //     this.logger.orcaLog(`Argument ${index}: ${JSON.stringify(arg, null, 2)}`);
-            // });
 
         });
 
@@ -66,11 +57,6 @@ class LoggingSocketHandler {
             this.logger.extensionLog('Socket.IO disconnected');
             this.logging_socket = null;
         });
-
-        // socket.onAny((event, ...args) => {
-        //     vscode.window.showInformationMessage('Message Received');
-        //     this.logger.extensionLog(`Received event: ${event}, with args: ${JSON.stringify(args)}`);
-        // });
 
         socket.on('connect_error', (error) => {
             if (!error.message.includes('xhr poll error')) {
@@ -104,25 +90,15 @@ class OrcaServerHandler {
             return;
         }
         
-        // TODO: fix paths
         const config = vscode.workspace.getConfiguration('orca');
-        const pythonPath = config.get('pythonPath');
-        const scriptPath = config.get('scriptPath');
-
-        if (!pythonPath) {
-            throw new Error('Python path not set, using default path: python');
-        }
-        if (!scriptPath) {
-            throw new Error('Script path not set');
-        }
+        const orcaCommand = process.env.ORCA_PATH || "orca";
 
         this.logger.extensionLog(`Starting Orca server...`);
-        this.logger.extensionLog(`Python path: ${pythonPath}`);
-        this.logger.extensionLog(`Script path: ${scriptPath}`);
+        this.logger.extensionLog(`Orca command: ${orcaCommand}`);
 
         
         try {
-            this.orcaProcess = spawn(`${pythonPath} ${scriptPath}`, {
+            this.orcaProcess = spawn(`${orcaCommand}`, ["server"], {
                 shell: true,
             });
             
@@ -210,6 +186,12 @@ class OrcaServerHandler {
 }
 
 export class OrcaServer{
+    private __isConnectable: boolean = false;
+    private onIsConnectable = new vscode.EventEmitter<boolean>();
+    set _isConnectable(value: boolean) {
+        this.onIsConnectable.fire(value);
+        this.__isConnectable = value;
+    }
     loggingSocketHandler: LoggingSocketHandler;
     orcaServerHandler: OrcaServerHandler;
     constructor(url: string = 'http://127.0.0.1:5000', vscodeLogs: LoggingChannels, logging_url: string | null = null) {
@@ -219,13 +201,21 @@ export class OrcaServer{
         this.loggingSocketHandler = new LoggingSocketHandler(logging_url, vscodeLogs);
         this.orcaServerHandler = new OrcaServerHandler(url, vscodeLogs);
     }
-    async isConnectable() {
-        return await this.orcaServerHandler.isConnectable() && this.loggingSocketHandler.isConnected();
+    
+    public subscribeOnIsConnectable(callback: (isConnectable: boolean) => any): vscode.Disposable {
+        return this.onIsConnectable.event(callback);
     }
+
+    async isConnectable() {
+        this._isConnectable = await this.orcaServerHandler.isConnectable();
+        return this._isConnectable;
+    }
+
     async startOrcaServer() {
         await this.orcaServerHandler.startOrcaServer();
         this.orcaServerHandler.waitforhost();
         await this.loggingSocketHandler.connect();
+        await this.isConnectable();
     }
     stopOrcaServer() {
         this.loggingSocketHandler.disconnect();

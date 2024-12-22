@@ -12,6 +12,12 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "yaml.schemas": [
+      {
+        "fileMatch": "*.orca.yml",
+        "url": "./src/yaml_schema/orca_schema.json"
+      }
+    ],
     "commands": [
       {
         "command": "orca-ide.helloWorld",
@@ -115,22 +121,16 @@
           "id": "orca-ide.methods-view",
           "name": "Orca Methods",
           "icon": "src/images/orca-vscode-icon.svg"
+        },{
+          "id": "orca-ide.installed-drivers-view",
+          "name": "Installed Drivers",
+          "icon": "src/images/orca-vscode-icon.svg"
         }
       ]
     },
     "configuration": {
       "title": "Orca",
       "properties": {
-        "orca.pythonPath": {
-          "type": "string",
-          "default": "python",
-          "description": "Path to the Python interpreter in Orca environment"
-        },
-        "orca.scriptPath": {
-          "type": "string",
-          "default": "",
-          "description": "Path to the Orca REST API script"
-        }
       }
     }
   },

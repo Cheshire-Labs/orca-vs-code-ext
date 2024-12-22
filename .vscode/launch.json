@@ -17,7 +17,8 @@
 			],
 			"preLaunchTask": "${defaultBuildTask}",
 			"env": {
-                "PYTHONPATH": "${workspaceFolder}/.venv/Scripts"
+                "PYTHONPATH": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+				"ORCA_PATH": "${workspaceFolder}\\.venv\\Scripts\\orca.exe"
             }
 		}
 	]

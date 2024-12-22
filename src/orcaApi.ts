@@ -174,7 +174,7 @@ export class OrcaApi {
 
     async getInstalledDrivers(): Promise<string[] | undefined> {
         try{
-            const response = await axios.get(this.url + '/get_installed_drivers');
+            const response = await axios.get(this.url + '/get_installed_drivers_info');
             const driver_infos: Record<string, any> = response.data["installedDriversInfo"];
             return Object.keys(driver_infos);
         } catch (error) {

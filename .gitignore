@@ -1,3 +1,4 @@
 node_modules
 dist
 .venv
+driver_manager/drivers.json
