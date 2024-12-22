@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import * as path from 'path';
+import * as fsExtra from 'fs-extra';
 
 export function copyExamplesToWorkspace() {
     const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -10,7 +10,7 @@ export function copyExamplesToWorkspace() {
     }
 
     const workspaceDir = workspaceFolders[0].uri.fsPath; // Use the first workspace folder
-    const extensionPath = vscode.extensions.getExtension('orca-ide')?.extensionPath;
+    const extensionPath = vscode.extensions.getExtension('cheshire-labs.orca-ide')?.extensionPath;
 
     if (!extensionPath) {
         vscode.window.showErrorMessage('Failed to locate the extension path.');
@@ -20,15 +20,14 @@ export function copyExamplesToWorkspace() {
     const sourceDir = path.join(extensionPath, 'examples');
     const destinationDir = path.join(workspaceDir, 'examples');
 
-    // Use fs.cp for recursive copying
-    fs.cp(sourceDir, destinationDir, { recursive: true, force: true }, (err) => {
+    // Use fs-extra's copy method with the `overwrite: false` flag
+    fsExtra.copy(sourceDir, destinationDir, { overwrite: false }, (err: any) => {
         if (err) {
             vscode.window.showErrorMessage(`Failed to copy examples: ${err.message}`);
         } else {
             vscode.window.showInformationMessage(
-                `Examples have been copied to ${destinationDir}.`
+                'Example Orca YAML files have been copied to your workspace.'
             );
         }
     });
-    vscode.window.showInformationMessage('Example Orca YAML files have been copied to your workspace.');
 }
