@@ -186,6 +186,12 @@ class OrcaServerHandler {
 }
 
 export class OrcaServer{
+    private __isConnectable: boolean = false;
+    private onIsConnectable = new vscode.EventEmitter<boolean>();
+    set _isConnectable(value: boolean) {
+        this.onIsConnectable.fire(value);
+        this.__isConnectable = value;
+    }
     loggingSocketHandler: LoggingSocketHandler;
     orcaServerHandler: OrcaServerHandler;
     constructor(url: string = 'http://127.0.0.1:5000', vscodeLogs: LoggingChannels, logging_url: string | null = null) {
@@ -195,13 +201,21 @@ export class OrcaServer{
         this.loggingSocketHandler = new LoggingSocketHandler(logging_url, vscodeLogs);
         this.orcaServerHandler = new OrcaServerHandler(url, vscodeLogs);
     }
-    async isConnectable() {
-        return await this.orcaServerHandler.isConnectable() && this.loggingSocketHandler.isConnected();
+    
+    public subscribeOnIsConnectable(callback: (isConnectable: boolean) => any): vscode.Disposable {
+        return this.onIsConnectable.event(callback);
     }
+
+    async isConnectable() {
+        this._isConnectable = await this.orcaServerHandler.isConnectable();
+        return this._isConnectable;
+    }
+
     async startOrcaServer() {
         await this.orcaServerHandler.startOrcaServer();
         this.orcaServerHandler.waitforhost();
         await this.loggingSocketHandler.connect();
+        await this.isConnectable();
     }
     stopOrcaServer() {
         this.loggingSocketHandler.disconnect();
