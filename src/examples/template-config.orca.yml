@@ -1,0 +1,72 @@
+system:
+  name: your-assay-name
+  version: 1.0.0
+  description: Brief description of your assay
+labwares:
+  labware-name-1:
+    type: Your Plate Type
+  labware-name-2:
+    type: Your Plate Type
+resources:
+  resource-name-1:
+    type: Your Resource Type
+    com: Your COM Port
+    plate-pad: Plate Pad name for Resource
+  resource-name-2:
+    type: Your Resource Type
+    ip: Your IP Port
+    plate-pad: Plate Pad name for Resource
+  robot-name-1:
+    type: Your Robot Type
+    ip: Your IP Address
+    positions: Your Positions File (Optional)
+  resource-pool-name-1:
+    type: pool
+    resources:
+      - resource-name-1
+      - resource-name-2
+  networking-device-1:
+    type: Your Networking Type
+    ip: Your IP Address
+config:
+  prod:
+    variable-1: prod-value
+    variable-2: prod-value
+  test:
+    variable-1: test-value
+    variable-2: test-value
+methods:
+  method-name-1:
+    actions:
+      - resource-name-1:
+          command: Your Command
+          inputs:
+            - labware-name-1
+            - labware-name-2
+          command-option-key-1: command-option-value-1
+  method-name-2:
+    actions:
+      - resource-name-2:
+          command: Your Command
+          inputs:
+            - labware-name-1
+            - labware-name-2
+          command-option-key-1: command-option-value-1
+workflows:
+  workflow-name-1:
+    threads:
+      thread-name-1:
+        labware: labware-name-1
+        type: start
+        start: Your Starting Resource
+        end: Your Ending Resource
+        steps:
+          - method-name-1
+          - method: method-name-2
+            spawn: 
+              - script-name-1
+scripting:
+  base-dir: path/to/your/scripts
+  scripts:
+    script-name-1:
+      source: script-filename:ScriptClassName
