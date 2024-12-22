@@ -3,6 +3,7 @@
   "displayName": "orca-ide",
   "description": "Extension to integrate Orca Lab Automation Scheduler with VS Code IDE",
   "version": "0.0.1",
+  "publisher": "cheshire-labs",
   "engines": {
     "vscode": "^1.92.0"
   },
@@ -24,9 +25,9 @@
         "title": "Hello World"
       },
       {
-        "title": "Generate Orca Configuration Template",
-        "category": "Orca",
-        "command": "orca-ide.generateYamlTemplate"
+        "command": "orca.copyExamples",
+        "title": "Copy Example Orca YAML files to Workspace",
+        "category": "Orca"
       },
       {
         "title": "Load Orca Configuration",
@@ -121,11 +122,13 @@
           "id": "orca-ide.methods-view",
           "name": "Orca Methods",
           "icon": "src/images/orca-vscode-icon.svg"
-        },{
+        },
+        {
           "id": "orca-ide.installed-drivers-view",
           "name": "Installed Drivers",
           "icon": "src/images/orca-vscode-icon.svg"
-        },{
+        },
+        {
           "id": "orca-ide.available-drivers-view",
           "name": "Available Drivers",
           "icon": "src/images/orca-vscode-icon.svg"
@@ -134,8 +137,7 @@
     },
     "configuration": {
       "title": "Orca",
-      "properties": {
-      }
+      "properties": {}
     }
   },
   "scripts": {
@@ -150,6 +152,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
     "@types/js-yaml": "^4.0.9",
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
@@ -166,6 +169,7 @@
   },
   "dependencies": {
     "axios": "^1.7.7",
+    "fs-extra": "^11.2.0",
     "js-yaml": "^4.1.0",
     "socket.io-client": "^4.8.1"
   }

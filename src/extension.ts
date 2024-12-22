@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { generateYamlTemplate } from './generateYamlTemplate';
 import { LoggingChannels } from './loggingChannels';
 import { OrcaServer } from './orcaServer';
 import { OrcaApi } from './orcaApi';
 import { WorkflowTreeViewProvider, MethodTreeViewProvider, InstalledDriversTreeViewProvider, WorkflowTreeItem, MethodTreeItem, AvailableDriversTreeViewProvider } from './sideview';
+import { copyExamplesToWorkspace } from './copyExamples';
 
 
 let url: string = 'http://127.0.0.1:5000';
@@ -14,10 +14,9 @@ let orcaApi: OrcaApi = new OrcaApi(url, vscodeLogs);
 
 export function activate(context: vscode.ExtensionContext) { 
 
-    	// Command to generate a YAML template
-	let generateYamlCommand = vscode.commands.registerCommand('orca-ide.generateYamlTemplate', async () => {
-		await generateYamlTemplate();
-	});
+    let copyExamplesCommand = vscode.commands.registerCommand('orca-ide.copyExamples', async () => {
+        await copyExamplesToWorkspace();
+    });
 
     let startServerCommand = vscode.commands.registerCommand('orca-ide.startServer', async () => {
         await orcaServer.startOrcaServer();
@@ -212,7 +211,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
         startServerCommand,
         stopServerCommand,
-		generateYamlCommand,
+        copyExamplesCommand,
 		loadYamlCommand, 
 		initializeCommand, 
 		runWorkflowCommand, 
@@ -223,6 +222,7 @@ export function activate(context: vscode.ExtensionContext) {
         uninstallDriverCommand);
     
     console.log('Extension "orca-ide" is now active!');
+    copyExamplesToWorkspace();
 
 }
 
