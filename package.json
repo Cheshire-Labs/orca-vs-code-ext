@@ -125,6 +125,10 @@
           "id": "orca-ide.installed-drivers-view",
           "name": "Installed Drivers",
           "icon": "src/images/orca-vscode-icon.svg"
+        },{
+          "id": "orca-ide.available-drivers-view",
+          "name": "Available Drivers",
+          "icon": "src/images/orca-vscode-icon.svg"
         }
       ]
     },

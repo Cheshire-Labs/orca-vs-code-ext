@@ -199,7 +199,7 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
     getChildren(element?: DriverTreeItem): vscode.ProviderResult<DriverTreeItem[]> {
         if (!element) {
             if (!this.isApiConnectable) {
-                return [new DriverTreeItem('Start Orca Server to see installed drivers')];
+                return [new DriverTreeItem('Start Orca Server to see available drivers')];
             }
             return this.availableDrivers;
         } else {
@@ -217,7 +217,7 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
             console.log('Refreshing drivers ', this.isApiConnectable  );
             if (this.isApiConnectable ) {
                 
-                await this.getInstalledDrivers();
+                await this.getAvailableDrivers();
                 this._onDidChangeTreeData.fire();
             }
         } catch (error) {
@@ -225,15 +225,15 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
         }
     }
 
-    private async getInstalledDrivers(): Promise<void> {
+    private async getAvailableDrivers(): Promise<void> {
         try {
             this.availableDrivers = [];
-            const driverNames = await this.orcaApi.getInstalledDrivers();
+            const driverNames = await this.orcaApi.getAvailableDrivers();
             if (Array.isArray(driverNames)) {
                 this.availableDrivers = driverNames.map(name => new DriverTreeItem(name));
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`Error getting installed drivers: ${error}`);
+            vscode.window.showErrorMessage(`Error getting available drivers: ${error}`);
         }
     }
 
