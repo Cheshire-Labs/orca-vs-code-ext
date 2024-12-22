@@ -29,6 +29,11 @@
         "command": "orca-ide.generateYamlTemplate"
       },
       {
+        "command": "orca.copyExamples",
+        "title": "Orca: Copy Examples to Workspace",
+        "category": "Orca"
+      },
+      {
         "title": "Load Orca Configuration",
         "category": "Orca",
         "command": "orca-ide.loadYaml",
