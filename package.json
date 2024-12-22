@@ -24,11 +24,6 @@
         "title": "Hello World"
       },
       {
-        "title": "Generate Orca Configuration Template",
-        "category": "Orca",
-        "command": "orca-ide.generateYamlTemplate"
-      },
-      {
         "command": "orca.copyExamples",
         "title": "Orca: Copy Examples to Workspace",
         "category": "Orca"

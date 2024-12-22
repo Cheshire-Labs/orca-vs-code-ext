@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { generateYamlTemplate } from './generateYamlTemplate';
 import { LoggingChannels } from './loggingChannels';
 import { OrcaServer } from './orcaServer';
 import { OrcaApi } from './orcaApi';
@@ -15,10 +14,6 @@ let orcaApi: OrcaApi = new OrcaApi(url, vscodeLogs);
 
 export function activate(context: vscode.ExtensionContext) { 
 
-    	// Command to generate a YAML template
-	let generateYamlCommand = vscode.commands.registerCommand('orca-ide.generateYamlTemplate', async () => {
-		await generateYamlTemplate();
-	});
     let copyExamplesCommand = vscode.commands.registerCommand('orca-ide.copyExamples', async () => {
         await copyExamplesToWorkspace();
     });
@@ -216,7 +211,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
         startServerCommand,
         stopServerCommand,
-		generateYamlCommand,
         copyExamplesCommand,
 		loadYamlCommand, 
 		initializeCommand, 
