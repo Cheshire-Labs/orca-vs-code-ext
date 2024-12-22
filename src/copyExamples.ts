@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fsExtra from 'fs-extra';
 
-export function copyExamplesToWorkspace() {
+export async function copyExamplesToWorkspace() {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {
         vscode.window.showErrorMessage('No workspace folder is open.');
@@ -20,14 +20,30 @@ export function copyExamplesToWorkspace() {
     const sourceDir = path.join(extensionPath, 'examples');
     const destinationDir = path.join(workspaceDir, 'examples');
 
-    // Use fs-extra's copy method with the `overwrite: false` flag
-    fsExtra.copy(sourceDir, destinationDir, { overwrite: false }, (err: any) => {
-        if (err) {
-            vscode.window.showErrorMessage(`Failed to copy examples: ${err.message}`);
-        } else {
+
+    try {
+        let filesCopied = 0;
+
+        // Copy files and check if they already exist
+        await fsExtra.copy(sourceDir, destinationDir, {
+            overwrite: false,
+            errorOnExist: false,
+            filter: (src, dest) => {
+                if (fsExtra.existsSync(dest)) {
+                    return false; // Skip existing files
+                }
+                filesCopied++; // Count newly copied files
+                return true; // Copy new files
+            },
+        });
+
+        if (filesCopied > 0) {
             vscode.window.showInformationMessage(
-                'Example Orca YAML files have been copied to your workspace.'
+                `Copied ${filesCopied} example Orca configuration files to your workspace. You can find them in the 'examples' folder.`
             );
         }
-    });
+    } catch (err) {
+        vscode.window.showErrorMessage(`Failed to copy examples: ${(err as Error).message}`);
+    }
 }
+
