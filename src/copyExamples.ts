@@ -30,4 +30,5 @@ export function copyExamplesToWorkspace() {
             );
         }
     });
+    vscode.window.showInformationMessage('Example Orca YAML files have been copied to your workspace.');
 }
