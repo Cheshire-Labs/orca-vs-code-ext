@@ -48,8 +48,11 @@ class LoggingSocketHandler {
             vscode.window.showInformationMessage('Message Received');
             this.logger.extensionLog('Message Received');
             const message = args[0];
-            this.logger.orcaLog(message["data"]);
-
+            if (typeof message === 'object' && message !== null && 'data' in message) {
+                this.logger.orcaLog(message.data);
+            } else {
+                this.logger.orcaLog(typeof message === 'string' ? message : JSON.stringify(message));
+            }
         });
 
         socket.on('disconnect', () => {
