@@ -6,7 +6,7 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Run Extension",
+			"name": "Run Extension (Windows)",
 			"type": "extensionHost",
 			"request": "launch",			
 			"args": [
@@ -19,6 +19,22 @@
 			"env": {
                 "PYTHONPATH": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
 				"ORCA_PATH": "${workspaceFolder}\\.venv\\Scripts\\orca.exe"
+            }
+		},
+		{
+			"name": "Run Extension (Mac)",
+			"type": "extensionHost",
+			"request": "launch",			
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}"
+			],
+			"outFiles": [
+				"${workspaceFolder}/dist/**/*.js"
+			],
+			"preLaunchTask": "${defaultBuildTask}",
+			"env": {
+                "PYTHONPATH": "${workspaceFolder}/.venv/bin/python",
+				"ORCA_PATH": "${workspaceFolder}/.venv/bin/orca"
             }
 		}
 	]
