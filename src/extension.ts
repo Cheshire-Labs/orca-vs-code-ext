@@ -4,6 +4,7 @@ import { OrcaServer } from './orcaServer';
 import { OrcaApi } from './orcaApi';
 import { WorkflowTreeViewProvider, MethodTreeViewProvider, InstalledDriversTreeViewProvider, WorkflowTreeItem, MethodTreeItem, AvailableDriversTreeViewProvider } from './sideview';
 import { copyExamplesToWorkspace } from './copyExamples';
+import { get } from 'axios';
 
 
 let url: string = 'http://127.0.0.1:5000';
@@ -53,6 +54,19 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage('Workflow not selected.');
             return;
         }
+
+        // Get available deployment stages
+        const deploymentStages = await orcaApi.getDeploymentStages();
+        if (!deploymentStages) {
+            vscode.window.showErrorMessage('Failed to get deployment stages.');
+            return;
+        }
+        const deploymentStage: string | undefined = await getDeploymentStage(deploymentStages);
+        if (!deploymentStage) {
+            vscode.window.showInformationMessage('Deployment stage not selected.');
+            return;
+        }
+            
     
         const workflowId = await orcaApi.runWorkflow(workflowName);
         if (!workflowId) {
@@ -84,6 +98,13 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage('Method not selected.');
             return;
         }
+
+        // Get available deployment stages
+        const deploymentStages = await orcaApi.getDeploymentStages();
+        if (!deploymentStages) {
+            vscode.window.showErrorMessage('Failed to get deployment stages.');
+            return;
+        }
     
         // Get input labwares, output labwares, and locations
         const inputLabwares = await orcaApi.getMethodRecipeInputLabwares(methodName);
@@ -104,7 +125,13 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
     
-        // Prompt the user to select start and end locations for labwares
+        // Prompt the user to select deployment stage, start locations, and end locations for labwares
+        const deploymentStage: string | undefined = await getDeploymentStage(deploymentStages);
+        if (!deploymentStage) {
+            vscode.window.showInformationMessage('Deployment stage not selected.');
+            return;
+        }
+
         const startMap: Record<string, string> | undefined = await getLocationMap(inputLabwares, locations, 'START');
         const endMap: Record<string, string> | undefined = await getLocationMap(outputLabwares, locations, 'END');
     
@@ -132,6 +159,13 @@ export function activate(context: vscode.ExtensionContext) {
     
         return vscode.window.showQuickPick(methodNames, { placeHolder: 'Select the method to run' });
     }
+
+    async function getDeploymentStage(deploymentStages: string[]): Promise<string | undefined> {
+        const deploymentStage = await vscode.window.showQuickPick(deploymentStages, { placeHolder: 'Select the deployment stage' });
+        return deploymentStage;
+    }
+    
+
     async function getLocationMap(labwares: string[], locations: string[], locationType: 'START' | 'END'): Promise<Record<string, string> | undefined> {
         const locationMap: Record<string, string> = {};
     

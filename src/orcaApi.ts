@@ -133,6 +133,16 @@ export class OrcaApi {
         }
     }
 
+    async getDeploymentStages(): Promise<string[] | undefined> {
+        try{
+            const response = await axios.get(this.url + '/get_deployment_stages');
+            return response.data["deploymentStages"];
+        } catch (error) {
+            this.logger.extensionLog(`Failed to get deployment stage names: ${error}`);
+            return undefined;
+        }
+    }
+
     async runWorkflow(workflowName: string): Promise<string | undefined> {
         try{
             const response = await axios.post(this.url + '/run_workflow', {
