@@ -68,7 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
             
     
-        const workflowId = await orcaApi.runWorkflow(workflowName);
+        const workflowId = await orcaApi.runWorkflow(workflowName, deploymentStage);
         if (!workflowId) {
             vscode.window.showErrorMessage('Failed to run workflow');
             return;
