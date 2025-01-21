@@ -147,9 +147,7 @@ export class OrcaApi {
         try{
             const response = await axios.post(this.url + '/run_workflow', {
                 workflowName: workflowName,
-                options: {
-                    stage: deploymentStage
-                }
+                stage: deploymentStage
             });
             
             return response.data["workflowId"];
