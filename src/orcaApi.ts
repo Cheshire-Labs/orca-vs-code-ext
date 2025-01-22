@@ -133,10 +133,21 @@ export class OrcaApi {
         }
     }
 
-    async runWorkflow(workflowName: string): Promise<string | undefined> {
+    async getDeploymentStages(): Promise<string[] | undefined> {
+        try{
+            const response = await axios.get(this.url + '/get_deployment_stages');
+            return response.data["deploymentStages"];
+        } catch (error) {
+            this.logger.extensionLog(`Failed to get deployment stage names: ${error}`);
+            return undefined;
+        }
+    }
+
+    async runWorkflow(workflowName: string, deploymentStage: string): Promise<string | undefined> {
         try{
             const response = await axios.post(this.url + '/run_workflow', {
-                workflowName: workflowName
+                workflowName: workflowName,
+                stage: deploymentStage
             });
             
             return response.data["workflowId"];
@@ -146,12 +157,13 @@ export class OrcaApi {
         }
     }
 
-    async runMethod(methodName: string, startMap: Record<string, string>, endMap: Record<string, string>): Promise<string | undefined> {
+    async runMethod(methodName: string, startMap: Record<string, string>, endMap: Record<string, string>, deploymentStage: string): Promise<string | undefined> {
         try{
             const response = await axios.post(this.url + '/run_method', {
                 methodName: methodName,
-                startMap: JSON.stringify(startMap),
-                endMap: JSON.stringify(endMap),
+                startMap: startMap,
+                endMap: endMap,
+                stage: deploymentStage,
             });
             this.logger.extensionLog(`${response.data["methodId"]}`);
             return response.data["methodId"];
