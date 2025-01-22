@@ -157,12 +157,13 @@ export class OrcaApi {
         }
     }
 
-    async runMethod(methodName: string, startMap: Record<string, string>, endMap: Record<string, string>): Promise<string | undefined> {
+    async runMethod(methodName: string, startMap: Record<string, string>, endMap: Record<string, string>, deploymentStage: string): Promise<string | undefined> {
         try{
             const response = await axios.post(this.url + '/run_method', {
                 methodName: methodName,
-                startMap: JSON.stringify(startMap),
-                endMap: JSON.stringify(endMap),
+                startMap: startMap,
+                endMap: endMap,
+                stage: deploymentStage,
             });
             this.logger.extensionLog(`${response.data["methodId"]}`);
             return response.data["methodId"];
