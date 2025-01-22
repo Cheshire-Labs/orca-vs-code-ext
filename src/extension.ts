@@ -141,7 +141,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     
         // Run the method
-        const methodId = await orcaApi.runMethod(methodName, startMap, endMap);
+        const methodId = await orcaApi.runMethod(methodName, startMap, endMap, deploymentStage);
         if (!methodId) {
             vscode.window.showErrorMessage('Failed to run method');
             return;
