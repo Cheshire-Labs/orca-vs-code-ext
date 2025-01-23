@@ -37,11 +37,11 @@ export class WorkflowTreeViewProvider implements vscode.TreeDataProvider<Workflo
 
     async refreshTree(): Promise<void> {
         try {
-            const isConnected = await this.orcaApi.isConnectable();
-            if (isConnected) {
+            // const isConnected = await this.orcaApi.isConnectable();
+            // if (isConnected) {
                 await this.getWorkflows();
                 this._onDidChangeTreeData.fire();
-            }
+            //}
         } catch (error) {
             vscode.window.showErrorMessage(`Error refreshing workflows: ${error}`);
         }
@@ -94,11 +94,11 @@ export class MethodTreeViewProvider implements vscode.TreeDataProvider<MethodTre
 
     async refreshTree(): Promise<void> {
         try {
-            const isConnected = await this.orcaApi.isConnectable();
-            if (isConnected) {
+            // const isConnected = await this.orcaApi.isConnectable();
+            //if (isConnected) {
                 await this.getMethods();
                 this._onDidChangeTreeData.fire();
-            }
+            //}
         } catch (error) {
             vscode.window.showErrorMessage(`Error refreshing methods: ${error}`);
         }
