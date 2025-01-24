@@ -107,7 +107,7 @@
         {
           "id": "orca-activity-bar",
           "title": "Orca",
-          "icon": "src/images/orca-vscode-icon.svg"
+          "icon": "src/images/grey_logo_transparent.png"
         }
       ]
     },
@@ -115,23 +115,19 @@
       "orca-activity-bar": [
         {
           "id": "orca-ide.workflows-view",
-          "name": "Orca Workflows",
-          "icon": "src/images/orca-vscode-icon.svg"
+          "name": "Orca Workflows"
         },
         {
           "id": "orca-ide.methods-view",
-          "name": "Orca Methods",
-          "icon": "src/images/orca-vscode-icon.svg"
+          "name": "Orca Methods"
         },
         {
           "id": "orca-ide.installed-drivers-view",
-          "name": "Installed Drivers",
-          "icon": "src/images/orca-vscode-icon.svg"
+          "name": "Installed Drivers"
         },
         {
           "id": "orca-ide.available-drivers-view",
-          "name": "Available Drivers",
-          "icon": "src/images/orca-vscode-icon.svg"
+          "name": "Available Drivers"
         }
       ]
     },
