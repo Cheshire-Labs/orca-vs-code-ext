@@ -223,7 +223,7 @@ export class OrcaApi {
 
     async stop(): Promise<string | undefined> {
         try{
-            const response = await axios.get(this.url + '/stop');
+            const response = await axios.post(this.url + '/stop');
             return response.data["message"];
         } catch (error) {
             this.logger.extensionLog(`Failed to stop Orca: ${error}`);
