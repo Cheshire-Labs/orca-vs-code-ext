@@ -261,8 +261,8 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 
-export function deactivate() {
-    orcaServer.stopOrcaServer();    
+export async function deactivate() {
+    await orcaServer.stopOrcaServer();    
 }
 
 
