@@ -53,8 +53,6 @@ class LoggingSocketHandler {
         });
 
         socket.on('logMessage', (...args) => {
-            vscode.window.showInformationMessage('Message Received');
-            this.logger.extensionLog('Message Received');
             const message = args[0];
             if (typeof message === 'object' && message !== null && 'data' in message) {
                 this.logger.orcaLog(message.data);
