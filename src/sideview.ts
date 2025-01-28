@@ -148,7 +148,11 @@ export class InstalledDriversTreeViewProvider implements vscode.TreeDataProvider
 
     onOrcaApiConnectable(isConnectable: boolean) {
         this.isApiConnectable = isConnectable;
-        this.refreshTree();
+        if (isConnectable) {
+            this.refreshTree();
+        } else {
+            this._onDidChangeTreeData.fire();
+        }
     }
 
     async refreshTree(): Promise<void> {
@@ -160,7 +164,7 @@ export class InstalledDriversTreeViewProvider implements vscode.TreeDataProvider
                 this._onDidChangeTreeData.fire();
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`Error refreshing methods: ${error}`);
+            vscode.window.showErrorMessage(`Error refreshing installed drivers: ${error}`);
         }
     }
 
@@ -209,7 +213,11 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
 
     onOrcaApiConnectable(isConnectable: boolean) {
         this.isApiConnectable = isConnectable;
-        this.refreshTree();
+        if (isConnectable) {
+            this.refreshTree();
+        } else {
+            this._onDidChangeTreeData.fire();
+        }
     }
 
     async refreshTree(): Promise<void> {
@@ -221,7 +229,7 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
                 this._onDidChangeTreeData.fire();
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`Error refreshing methods: ${error}`);
+            vscode.window.showErrorMessage(`Error refreshing available drivers: ${error}`);
         }
     }
 
