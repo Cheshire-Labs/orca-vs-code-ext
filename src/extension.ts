@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { LoggingChannels } from './loggingChannels';
 import { OrcaServer } from './orcaServer';
 import { OrcaApi } from './orcaApi';
-import { WorkflowTreeViewProvider, MethodTreeViewProvider, InstalledDriversTreeViewProvider, WorkflowTreeItem, MethodTreeItem, AvailableDriversTreeViewProvider } from './sideview';
+import { WorkflowTreeViewProvider, MethodTreeViewProvider, InstalledDriversTreeViewProvider, WorkflowTreeItem, MethodTreeItem, AvailableDriversTreeViewProvider, DriverTreeItem } from './sideview';
 import { copyExamplesToWorkspace } from './copyExamples';
 
 
@@ -154,21 +154,30 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage('Orca server stopped successfully!');
     });
     
-    const installDriverCommand = vscode.commands.registerCommand('orca-ide.installDriver', async (driverName?: string) => {
+    const installDriverCommand = vscode.commands.registerCommand('orca-ide.installDriver', async (item?: DriverTreeItem | string) => {
+        const driverName = typeof item === 'string' ? item : item?.label ?? await selectDriverName();
         if (!driverName) {
-            const availableDrivers = await orcaApi.getAvailableDrivers();
-            if (!availableDrivers || availableDrivers.length === 0) {
-                vscode.window.showErrorMessage('No drivers available for installation.');
-                return;
-            }
-            driverName = await vscode.window.showQuickPick(availableDrivers, { placeHolder: 'Select the driver to install' });
-            if (!driverName) {
-                return;
-            }
+            vscode.window.showErrorMessage('No driver selected for installation.');
+            return;
         }
-        await orcaApi.installDriver(driverName);
-        vscode.window.showInformationMessage(`Driver '${driverName}' installed successfully.`);
+        
+        const result = await orcaApi.installDriver(driverName);
+        if (result) {
+            vscode.window.showInformationMessage(`Driver '${driverName}' installed successfully.`);
+        } else {
+            vscode.window.showErrorMessage(`Error while installing driver '${driverName}'.`);
+        }
     });
+
+    async function selectDriverName(): Promise<string | undefined> {
+        const driverNames = await orcaApi.getAvailableDrivers();
+        if (!driverNames || driverNames.length === 0) {
+            vscode.window.showErrorMessage('No drivers available for installation.');
+            return undefined;
+        }
+    
+        return vscode.window.showQuickPick(driverNames, { placeHolder: 'Select the driver to install' });
+    }
 
     const installDriverFromRepoCommand = vscode.commands.registerCommand('orca-ide.installDriverFromRepo', async () => {
         const driverName = await vscode.window.showInputBox({ placeHolder: 'Enter the name of the driver to install' });

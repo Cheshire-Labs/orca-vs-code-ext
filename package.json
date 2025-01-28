@@ -67,6 +67,12 @@
         "category": "Orca",
         "command": "orca-ide.stop",
         "icon": "$(primitive-square)"
+      },
+      {
+        "title": "Install Driver",
+        "category": "Orca",
+        "command": "orca-ide.installDriver",
+        "icon": "$(cloud-download)"
       }
     ],
     "menus": {
@@ -98,6 +104,11 @@
         {
           "command": "orca-ide.runMethod",
           "when": "viewItem == method",
+          "group": "inline"
+        },
+        {
+          "command": "orca-ide.installDriver",
+          "when": "view == orca-ide.available-drivers-view && viewItem == availableDriver",
           "group": "inline"
         }
       ]
