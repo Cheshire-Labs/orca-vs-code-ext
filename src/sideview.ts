@@ -122,8 +122,8 @@ export class InstalledDriversTreeViewProvider implements vscode.TreeDataProvider
     private orcaServer: OrcaServer;
     private installedDrivers: DriverTreeItem[] = [];
     private isApiConnectable: boolean = false;
-    private _onDidChangeTreeData: vscode.EventEmitter<DriverTreeItem | undefined | null | void> = new vscode.EventEmitter<MethodTreeItem | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<MethodTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
+    private _onDidChangeTreeData: vscode.EventEmitter<DriverTreeItem | undefined | null | void> = new vscode.EventEmitter<DriverTreeItem | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<DriverTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
     constructor(orcaServer: OrcaServer, orcaApi: OrcaApi) {
         this.orcaApi = orcaApi;
@@ -183,7 +183,7 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
     private orcaServer: OrcaServer;
     private availableDrivers: DriverTreeItem[] = [];
     private isApiConnectable: boolean = false;
-    private _onDidChangeTreeData: vscode.EventEmitter<DriverTreeItem | undefined | null | void> = new vscode.EventEmitter<MethodTreeItem | undefined | null | void>();
+    private _onDidChangeTreeData: vscode.EventEmitter<DriverTreeItem | undefined | null | void> = new vscode.EventEmitter<DriverTreeItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<DriverTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
     constructor(orcaServer: OrcaServer, orcaApi: OrcaApi) {
@@ -242,9 +242,11 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
 export class DriverTreeItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
-        public readonly contextValue: string = 'driver'
+        public readonly contextValue: string = 'driver',
+        public readonly installed: boolean = false,
     ) {
         super(label, vscode.TreeItemCollapsibleState.None);
+        this.contextValue = installed ? 'installedDriver' : 'availableDriver';
     }
 }
 
