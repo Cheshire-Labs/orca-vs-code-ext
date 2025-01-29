@@ -233,21 +233,50 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(`Driver '${driverName}' installed successfully.`);
     });
 
-    const uninstallDriverCommand = vscode.commands.registerCommand('orca-ide.uninstallDriver', async (driverName?: string) => {
+    // const uninstallDriverCommand = vscode.commands.registerCommand('orca-ide.uninstallDriver', async (driverName?: string) => {
+    //     if (!driverName) {
+    //         const installedDrivers = await orcaApi.getInstalledDrivers();
+    //         if (!installedDrivers || installedDrivers.length === 0) {
+    //             vscode.window.showErrorMessage('No drivers installed.');
+    //             return;
+    //         }
+    //         driverName = await vscode.window.showQuickPick(installedDrivers, { placeHolder: 'Select the driver to uninstall' });
+    //         if (!driverName) {
+    //             return;
+    //         }
+    //     }
+    //     await orcaApi.uninstallDriver(driverName);
+    //     vscode.window.showInformationMessage(`Driver '${driverName}' uninstalled successfully.`);
+    // });
+
+
+    const uninstallDriverCommand = vscode.commands.registerCommand('orca-ide.uninstallDriver', async (item?: DriverTreeItem | string) => {
+        const driverName = typeof item === 'string' ? item : item?.label ?? await selectInstalledDriverName();
         if (!driverName) {
-            const installedDrivers = await orcaApi.getInstalledDrivers();
-            if (!installedDrivers || installedDrivers.length === 0) {
-                vscode.window.showErrorMessage('No drivers installed.');
-                return;
-            }
-            driverName = await vscode.window.showQuickPick(installedDrivers, { placeHolder: 'Select the driver to uninstall' });
-            if (!driverName) {
-                return;
-            }
+            vscode.window.showErrorMessage('No driver selected for uninstallation.');
+            return;
         }
-        await orcaApi.uninstallDriver(driverName);
-        vscode.window.showInformationMessage(`Driver '${driverName}' uninstalled successfully.`);
+        
+        const result = await orcaApi.uninstallDriver(driverName);
+        if (result) {
+            vscode.window.showInformationMessage(`Driver '${driverName}' uninstalled successfully.`);
+            // Refresh both tree views
+            await installedDriversProvider.refreshTree();
+            await availableDriversProvider.refreshTree();
+        } else {
+            vscode.window.showErrorMessage(`Error while uninstalling driver '${driverName}'.`);
+        }
     });
+
+    async function selectInstalledDriverName(): Promise<string | undefined> {
+        const driverNames = await orcaApi.getInstalledDrivers();
+        if (!driverNames || driverNames.length === 0) {
+            vscode.window.showErrorMessage('No drivers installed.');
+            return undefined;
+        }
+    
+        return vscode.window.showQuickPick(driverNames, { placeHolder: 'Select the driver to uninstall' });
+    }
 
     try{
         vscode.window.registerTreeDataProvider("orca-ide.workflows-view", new WorkflowTreeViewProvider(orcaApi));
