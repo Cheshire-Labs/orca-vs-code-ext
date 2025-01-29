@@ -23,7 +23,7 @@ export class WorkflowTreeViewProvider implements vscode.TreeDataProvider<Workflo
     getChildren(element?: WorkflowTreeItem): vscode.ProviderResult<WorkflowTreeItem[]> {
         if (!element) {
             if (!this.configLoaded) { 
-                return [new WorkflowTreeItem('Load a configuration file to see workflows', vscode.TreeItemCollapsibleState.None, 'default')]; 
+                return [new WorkflowTreeItem('Load a configuration file to see workflows', vscode.TreeItemCollapsibleState.None, 'default')];
             }
             return this.workflows;
         }
@@ -80,7 +80,7 @@ export class MethodTreeViewProvider implements vscode.TreeDataProvider<MethodTre
     getChildren(element?: MethodTreeItem): vscode.ProviderResult<MethodTreeItem[]> {
         if (!element) {
             if (!this.configLoaded) { 
-                return [new MethodTreeItem('Load a configuration file to see methods', 'default')]; 
+                return [new MethodTreeItem('Load a configuration file to see methods', 'default')];
             }
             return this.methods;
         }
