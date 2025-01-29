@@ -23,7 +23,7 @@ export class WorkflowTreeViewProvider implements vscode.TreeDataProvider<Workflo
     getChildren(element?: WorkflowTreeItem): vscode.ProviderResult<WorkflowTreeItem[]> {
         if (!element) {
             if (!this.configLoaded) { 
-                return [new WorkflowTreeItem('Load a configuration file to see workflows')]; 
+                return [new WorkflowTreeItem('Load a configuration file to see workflows', vscode.TreeItemCollapsibleState.None, 'default')]; 
             }
             return this.workflows;
         }
@@ -80,7 +80,7 @@ export class MethodTreeViewProvider implements vscode.TreeDataProvider<MethodTre
     getChildren(element?: MethodTreeItem): vscode.ProviderResult<MethodTreeItem[]> {
         if (!element) {
             if (!this.configLoaded) { 
-                return [new WorkflowTreeItem('Load a configuration file to see methods')]; 
+                return [new MethodTreeItem('Load a configuration file to see methods', 'default')]; 
             }
             return this.methods;
         }
@@ -138,7 +138,7 @@ export class InstalledDriversTreeViewProvider implements vscode.TreeDataProvider
     getChildren(element?: DriverTreeItem): vscode.ProviderResult<DriverTreeItem[]> {
         if (!element) {
             if (!this.isApiConnectable) {
-                return [new DriverTreeItem('Start Orca Server to see installed drivers')];
+                return [new DriverTreeItem('Start Orca Server to see installed drivers', 'default')];
             }
             return this.installedDrivers;
         } else {
@@ -203,7 +203,7 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
     getChildren(element?: DriverTreeItem): vscode.ProviderResult<DriverTreeItem[]> {
         if (!element) {
             if (!this.isApiConnectable) {
-                return [new DriverTreeItem('Start Orca Server to see available drivers')];
+                return [new DriverTreeItem('Start Orca Server to see available drivers', 'default')];
             }
             return this.availableDrivers;
         } else {
@@ -254,7 +254,7 @@ export class DriverTreeItem extends vscode.TreeItem {
         public readonly installed: boolean = false,
     ) {
         super(label, vscode.TreeItemCollapsibleState.None);
-        this.contextValue = installed ? 'installedDriver' : 'availableDriver';
+        this.contextValue = contextValue === 'default' ? 'default' : (installed ? 'installedDriver' : 'availableDriver');
     }
 }
 
