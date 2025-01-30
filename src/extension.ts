@@ -198,7 +198,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showErrorMessage('No driver selected for installation.');
             return;
         }
-        
+        vscode.window.showInformationMessage(`Installing driver '${driverName}'...`);
         const result = await orcaApi.installDriver(driverName);
         if (result) {
             vscode.window.showInformationMessage(`Driver '${driverName}' installed successfully.`);
