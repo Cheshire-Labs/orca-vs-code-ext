@@ -23,7 +23,7 @@ export class WorkflowTreeViewProvider implements vscode.TreeDataProvider<Workflo
     getChildren(element?: WorkflowTreeItem): vscode.ProviderResult<WorkflowTreeItem[]> {
         if (!element) {
             if (!this.configLoaded) { 
-                return [new WorkflowTreeItem('Load a configuration file to see workflows')]; 
+                return [new WorkflowTreeItem('Load a configuration file to see workflows', vscode.TreeItemCollapsibleState.None, 'default')];
             }
             return this.workflows;
         }
@@ -80,7 +80,7 @@ export class MethodTreeViewProvider implements vscode.TreeDataProvider<MethodTre
     getChildren(element?: MethodTreeItem): vscode.ProviderResult<MethodTreeItem[]> {
         if (!element) {
             if (!this.configLoaded) { 
-                return [new WorkflowTreeItem('Load a configuration file to see methods')]; 
+                return [new MethodTreeItem('Load a configuration file to see methods', 'default')];
             }
             return this.methods;
         }
@@ -122,8 +122,8 @@ export class InstalledDriversTreeViewProvider implements vscode.TreeDataProvider
     private orcaServer: OrcaServer;
     private installedDrivers: DriverTreeItem[] = [];
     private isApiConnectable: boolean = false;
-    private _onDidChangeTreeData: vscode.EventEmitter<DriverTreeItem | undefined | null | void> = new vscode.EventEmitter<MethodTreeItem | undefined | null | void>();
-    readonly onDidChangeTreeData: vscode.Event<MethodTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
+    private _onDidChangeTreeData: vscode.EventEmitter<DriverTreeItem | undefined | null | void> = new vscode.EventEmitter<DriverTreeItem | undefined | null | void>();
+    readonly onDidChangeTreeData: vscode.Event<DriverTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
     constructor(orcaServer: OrcaServer, orcaApi: OrcaApi) {
         this.orcaApi = orcaApi;
@@ -138,7 +138,7 @@ export class InstalledDriversTreeViewProvider implements vscode.TreeDataProvider
     getChildren(element?: DriverTreeItem): vscode.ProviderResult<DriverTreeItem[]> {
         if (!element) {
             if (!this.isApiConnectable) {
-                return [new DriverTreeItem('Start Orca Server to see installed drivers')];
+                return [new DriverTreeItem('Start Orca Server to see installed drivers', 'default')];
             }
             return this.installedDrivers;
         } else {
@@ -148,7 +148,11 @@ export class InstalledDriversTreeViewProvider implements vscode.TreeDataProvider
 
     onOrcaApiConnectable(isConnectable: boolean) {
         this.isApiConnectable = isConnectable;
-        this.refreshTree();
+        if (isConnectable) {
+            this.refreshTree();
+        } else {
+            this._onDidChangeTreeData.fire();
+        }
     }
 
     async refreshTree(): Promise<void> {
@@ -160,7 +164,7 @@ export class InstalledDriversTreeViewProvider implements vscode.TreeDataProvider
                 this._onDidChangeTreeData.fire();
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`Error refreshing methods: ${error}`);
+            vscode.window.showErrorMessage(`Error refreshing installed drivers: ${error}`);
         }
     }
 
@@ -183,7 +187,7 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
     private orcaServer: OrcaServer;
     private availableDrivers: DriverTreeItem[] = [];
     private isApiConnectable: boolean = false;
-    private _onDidChangeTreeData: vscode.EventEmitter<DriverTreeItem | undefined | null | void> = new vscode.EventEmitter<MethodTreeItem | undefined | null | void>();
+    private _onDidChangeTreeData: vscode.EventEmitter<DriverTreeItem | undefined | null | void> = new vscode.EventEmitter<DriverTreeItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<DriverTreeItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
     constructor(orcaServer: OrcaServer, orcaApi: OrcaApi) {
@@ -199,7 +203,7 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
     getChildren(element?: DriverTreeItem): vscode.ProviderResult<DriverTreeItem[]> {
         if (!element) {
             if (!this.isApiConnectable) {
-                return [new DriverTreeItem('Start Orca Server to see available drivers')];
+                return [new DriverTreeItem('Start Orca Server to see available drivers', 'default')];
             }
             return this.availableDrivers;
         } else {
@@ -209,7 +213,11 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
 
     onOrcaApiConnectable(isConnectable: boolean) {
         this.isApiConnectable = isConnectable;
-        this.refreshTree();
+        if (isConnectable) {
+            this.refreshTree();
+        } else {
+            this._onDidChangeTreeData.fire();
+        }
     }
 
     async refreshTree(): Promise<void> {
@@ -221,7 +229,7 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
                 this._onDidChangeTreeData.fire();
             }
         } catch (error) {
-            vscode.window.showErrorMessage(`Error refreshing methods: ${error}`);
+            vscode.window.showErrorMessage(`Error refreshing available drivers: ${error}`);
         }
     }
 
@@ -242,9 +250,11 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
 export class DriverTreeItem extends vscode.TreeItem {
     constructor(
         public readonly label: string,
-        public readonly contextValue: string = 'driver'
+        public readonly contextValue: string = 'driver',
+        public readonly installed: boolean = false,
     ) {
         super(label, vscode.TreeItemCollapsibleState.None);
+        this.contextValue = contextValue === 'default' ? 'default' : (installed ? 'installedDriver' : 'availableDriver');
     }
 }
 

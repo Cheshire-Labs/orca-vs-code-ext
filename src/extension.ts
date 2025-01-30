@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { LoggingChannels } from './loggingChannels';
 import { OrcaServer } from './orcaServer';
 import { OrcaApi } from './orcaApi';
-import { WorkflowTreeViewProvider, MethodTreeViewProvider, InstalledDriversTreeViewProvider, WorkflowTreeItem, MethodTreeItem, AvailableDriversTreeViewProvider } from './sideview';
+import { WorkflowTreeViewProvider, MethodTreeViewProvider, InstalledDriversTreeViewProvider, WorkflowTreeItem, MethodTreeItem, AvailableDriversTreeViewProvider, DriverTreeItem } from './sideview';
 import { copyExamplesToWorkspace } from './copyExamples';
 import { get } from 'axios';
 
@@ -188,21 +188,37 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage('Orca server stopped successfully!');
     });
     
-    const installDriverCommand = vscode.commands.registerCommand('orca-ide.installDriver', async (driverName?: string) => {
+    // Create tree view providers since we need to refresh them when installing drivers
+    const installedDriversProvider = new InstalledDriversTreeViewProvider(orcaServer, orcaApi);
+    const availableDriversProvider = new AvailableDriversTreeViewProvider(orcaServer, orcaApi);
+
+    const installDriverCommand = vscode.commands.registerCommand('orca-ide.installDriver', async (item?: DriverTreeItem | string) => {
+        const driverName = typeof item === 'string' ? item : item?.label ?? await selectDriverName();
         if (!driverName) {
-            const availableDrivers = await orcaApi.getAvailableDrivers();
-            if (!availableDrivers || availableDrivers.length === 0) {
-                vscode.window.showErrorMessage('No drivers available for installation.');
-                return;
-            }
-            driverName = await vscode.window.showQuickPick(availableDrivers, { placeHolder: 'Select the driver to install' });
-            if (!driverName) {
-                return;
-            }
+            vscode.window.showErrorMessage('No driver selected for installation.');
+            return;
         }
-        await orcaApi.installDriver(driverName);
-        vscode.window.showInformationMessage(`Driver '${driverName}' installed successfully.`);
+        vscode.window.showInformationMessage(`Installing driver '${driverName}'...`);
+        const result = await orcaApi.installDriver(driverName);
+        if (result) {
+            vscode.window.showInformationMessage(`Driver '${driverName}' installed successfully.`);
+            // Refresh both tree views
+            await installedDriversProvider.refreshTree();
+            await availableDriversProvider.refreshTree();
+        } else {
+            vscode.window.showErrorMessage(`Error while installing driver '${driverName}'.`);
+        }
     });
+
+    async function selectDriverName(): Promise<string | undefined> {
+        const driverNames = await orcaApi.getAvailableDrivers();
+        if (!driverNames || driverNames.length === 0) {
+            vscode.window.showErrorMessage('No drivers available for installation.');
+            return undefined;
+        }
+    
+        return vscode.window.showQuickPick(driverNames, { placeHolder: 'Select the driver to install' });
+    }
 
     const installDriverFromRepoCommand = vscode.commands.registerCommand('orca-ide.installDriverFromRepo', async () => {
         const driverName = await vscode.window.showInputBox({ placeHolder: 'Enter the name of the driver to install' });
@@ -236,8 +252,8 @@ export function activate(context: vscode.ExtensionContext) {
     try{
         vscode.window.registerTreeDataProvider("orca-ide.workflows-view", new WorkflowTreeViewProvider(orcaApi));
         vscode.window.registerTreeDataProvider("orca-ide.methods-view", new MethodTreeViewProvider(orcaApi));
-        vscode.window.registerTreeDataProvider("orca-ide.installed-drivers-view", new InstalledDriversTreeViewProvider(orcaServer, orcaApi));
-        vscode.window.registerTreeDataProvider("orca-ide.available-drivers-view", new AvailableDriversTreeViewProvider(orcaServer, orcaApi));
+        vscode.window.registerTreeDataProvider("orca-ide.installed-drivers-view", installedDriversProvider);
+        vscode.window.registerTreeDataProvider("orca-ide.available-drivers-view", availableDriversProvider);
     }catch (error) {
         vscode.window.showErrorMessage(`Failed to start Orca server: ${error}`);        
     }
