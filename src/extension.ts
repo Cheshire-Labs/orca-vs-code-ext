@@ -21,6 +21,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     let startServerCommand = vscode.commands.registerCommand('orca-ide.startServer', async () => {
         await orcaServer.startOrcaServer();
+        await Promise.all([
+            installedDriversProvider.refreshTree(),
+            availableDriversProvider.refreshTree()
+        ]);
     });
 
     let stopServerCommand = vscode.commands.registerCommand('orca-ide.stopServer', async () => {
@@ -30,6 +34,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// Command to load a YAML file in Orca and initialize
 	let loadYamlCommand = vscode.commands.registerCommand('orca-ide.loadYaml', async () => {
         await orcaServer.startOrcaServer();
+        await Promise.all([
+            installedDriversProvider.refreshTree(),
+            availableDriversProvider.refreshTree()
+        ]);
         const dialogUri = await vscode.window.showOpenDialog({ title: 'Enter the path to the YAML file', canSelectFiles: true, canSelectFolders: false, canSelectMany: false, filters: {  'YAML Files': ['orca.yml', 'orca.yaml', 'yml', 'yaml'] }});
         if (dialogUri && dialogUri.length === 1) {
             const filepath = dialogUri[0].fsPath;
@@ -202,9 +210,10 @@ export function activate(context: vscode.ExtensionContext) {
         const result = await orcaApi.installDriver(driverName);
         if (result) {
             vscode.window.showInformationMessage(`Driver '${driverName}' installed successfully.`);
-            // Refresh both tree views
-            await installedDriversProvider.refreshTree();
-            await availableDriversProvider.refreshTree();
+            await Promise.all([
+                installedDriversProvider.refreshTree(),
+                availableDriversProvider.refreshTree()
+            ]);
         } else {
             vscode.window.showErrorMessage(`Error while installing driver '${driverName}'.`);
         }
@@ -233,23 +242,6 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(`Driver '${driverName}' installed successfully.`);
     });
 
-    // const uninstallDriverCommand = vscode.commands.registerCommand('orca-ide.uninstallDriver', async (driverName?: string) => {
-    //     if (!driverName) {
-    //         const installedDrivers = await orcaApi.getInstalledDrivers();
-    //         if (!installedDrivers || installedDrivers.length === 0) {
-    //             vscode.window.showErrorMessage('No drivers installed.');
-    //             return;
-    //         }
-    //         driverName = await vscode.window.showQuickPick(installedDrivers, { placeHolder: 'Select the driver to uninstall' });
-    //         if (!driverName) {
-    //             return;
-    //         }
-    //     }
-    //     await orcaApi.uninstallDriver(driverName);
-    //     vscode.window.showInformationMessage(`Driver '${driverName}' uninstalled successfully.`);
-    // });
-
-
     const uninstallDriverCommand = vscode.commands.registerCommand('orca-ide.uninstallDriver', async (item?: DriverTreeItem | string) => {
         const driverName = typeof item === 'string' ? item : item?.label ?? await selectInstalledDriverName();
         if (!driverName) {
@@ -260,9 +252,10 @@ export function activate(context: vscode.ExtensionContext) {
         const result = await orcaApi.uninstallDriver(driverName);
         if (result) {
             vscode.window.showInformationMessage(`Driver '${driverName}' uninstalled successfully.`);
-            // Refresh both tree views
-            await installedDriversProvider.refreshTree();
-            await availableDriversProvider.refreshTree();
+            await Promise.all([
+                installedDriversProvider.refreshTree(),
+                availableDriversProvider.refreshTree()
+            ]);
         } else {
             vscode.window.showErrorMessage(`Error while uninstalling driver '${driverName}'.`);
         }
