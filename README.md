@@ -97,15 +97,6 @@ Orca enables users to define and run workflows for lab automation by coordinatin
 | `orca-ide.installDriver`   | Install a driver.                              |
 | `orca-ide.uninstallDriver` | Uninstall a driver.                            |
 
-## Why Was This Created?
-
-The **Orca VS Code Extension** was built to make lab automation more accessible. Editing configuration files, tracking changes in **git**, and managing workflows within lab automation need to be fixed. However, feedback is crucial—should this:
-
-- Move to the **cloud**?
-- Replace **YAML** with standard **Python scripts**?
-- Other suggestions?
-
-Lab automation needs to be **fixed**, and your thoughts are welcome! Reach out at [**support@cheshirelabs.io**](mailto\:support@cheshirelabs.io).
 
 ## Additional Resources
 
