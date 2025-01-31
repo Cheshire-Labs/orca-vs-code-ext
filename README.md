@@ -1,71 +1,122 @@
-# orca-ide README
+# Orca VS Code Extension README
 
-This is the README for your extension "orca-ide". After writing up a brief description, we recommend including the following sections.
+## Overview
+
+The **Orca VS Code Extension** (also referred to as the **Orca IDE**) provides an integrated development environment for creating and managing configuration files for **Orca**, a lab automation scheduler. This extension allows users to edit, validate, and execute **.orca.yml** configuration files directly within **VS Code**.
+
+Orca enables users to define and run workflows for lab automation by coordinating robotic instruments. The VS Code extension simplifies the process by providing tools for editing configurations, managing drivers, and executing workflows/methods within the IDE.
+
+🚀 **Note:** This is a **prototype**. Bugs are expected. 
+
+💬 Feedback is highly encouraged! I want **all feedback**, even if you hate the entire premise of this. Would you use this? Would you never use it? Would you prefer this to be standard Python classes instead of a configuration file? How do we fix lab automation?!  Let me know what works, what doesn't, and what should change. If you have suggestions, reach out at [**support@cheshirelabs.io**](mailto:support@cheshirelabs.io).
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **YAML Schema Support:** Provides a schema for `*.orca.yml` files to assist in writing valid configurations.
+- **Example Workflows:** Includes example workflows for testing.
+  - **SMC Assay**: Can be simulated within the IDE.
+  - **Venus Demo**: Uses the **Venus Driver** to open **Hamilton Venus**.
+- **Driver Management:** Install and uninstall **Orca drivers** from the extension.
+- **Workflow & Method Execution:**
+  - Load an **.orca.yml** configuration file.
+  - Select workflows and methods to execute within the VS Code UI.
+  - Define where labware starts and ends (labware must start on a **plate pad**).
+- **Logging System:**
+  - **Orca Extension Log**: Logs related to the extension’s operations.
+  - **Orca Server Log**: Logs for the Orca server, API calls, etc.
+  - **Orca Logs**: Logs showing simulation details.
+- **Activity Bar Integration:** Opens with the **Cheshire Labs** logo, providing access to different views:
+  - **Workflows View:** Shows workflows in the loaded configuration.
+  - **Methods View:** Displays available methods.
+  - **Installed Drivers:** Shows installed drivers.
+  - **Available Drivers:** Lists drivers that can be installed.
 
-For example if there is an image subfolder under your extension project workspace:
+## Installation
 
-\!\[feature X\]\(images/feature-x.png\)
+1. Install the extension from the **VS Code Marketplace**.
+2. Install Orca via pip:
+   ```sh
+   pip install cheshire-orca
+   ```
+3. If using the **Venus example**, install the driver:
+   ```sh
+   pip install orca-driver-venus
+   ```
+   Alternatively, use the **IDE’s driver install functionality**.
+4. Import the **Hamilton Venus** packages by placing them in:
+   ```
+   C:\Program Files (x86)\HAMILTON\Methods\Cheshire Labs\
+   ```
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Using the Extension
 
-## Requirements
+### 1. Loading a Configuration File
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Click the **"Load Configuration"** button in the Workflows view.
+- Select a `*.orca.yml` file.
 
-## Extension Settings
+### 2. Running a Workflow
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+- Click the **Play button** next to a workflow.
+- Select a **configuration deployment stage** (a dropdown will appear).
+- The workflow will run using **Orca**.
 
-For example:
+### 3. Running a Method
 
-This extension contributes the following settings:
+- Click the **Play button** next to a method.
+- Select a **configuration deployment stage**.
+- Assign start and end locations for **each method’s expected labware**.
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+### 4. Installing and Uninstalling Drivers
 
-## Known Issues
+- **To Install a Driver:** Click the **Download button** in the "Available Drivers" view.
+- **To Uninstall a Driver:** Click the **Trash icon** in the "Installed Drivers" view.
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+### 5. Logging
 
-## Release Notes
+- View logs from the **Logging Window**.
+- Select log type from the dropdown menu.
 
-Users appreciate release notes as you update your extension.
+## Known Limitations
 
-### 1.0.0
+- **Labware cannot start or end on instruments**; they must **start on a plate pad**.
+- **The 'Stop' command does not work**; use **'Stop Server'** instead.
 
-Initial release of ...
+## Commands Available
 
-### 1.0.1
+| Command                    | Description                                    |
+| -------------------------- | ---------------------------------------------- |
+| `orca.copyExamples`        | Copy example Orca YAML files to the workspace. |
+| `orca-ide.loadYaml`        | Load an Orca configuration file.               |
+| `orca-ide.initialize`      | Initialize resources.                          |
+| `orca-ide.runWorkflow`     | Run a workflow.                                |
+| `orca-ide.runMethod`       | Run a method.                                  |
+| `orca-ide.startServer`     | Start the Orca server.                         |
+| `orca-ide.stopServer`      | Stop the Orca server.                          |
+| `orca-ide.stop`            | **(Not working)** Use "Stop Server" instead.   |
+| `orca-ide.installDriver`   | Install a driver.                              |
+| `orca-ide.uninstallDriver` | Uninstall a driver.                            |
 
-Fixed issue #.
+## Why Was This Created?
 
-### 1.1.0
+The **Orca VS Code Extension** was built to make lab automation more accessible. Editing configuration files, tracking changes in **git**, and managing workflows within lab automation need to be fixed. However, feedback is crucial—should this:
 
-Added features X, Y, and Z.
+- Move to the **cloud**?
+- Replace **YAML** with standard **Python scripts**?
+- Other suggestions?
+
+Lab automation needs to be **fixed**, and your thoughts are welcome! Reach out at [**support@cheshirelabs.io**](mailto\:support@cheshirelabs.io).
+
+## Additional Resources
+
+- **Orca Repo & Configuration Guide:** [https://github.com/Cheshire-Labs/orca](https://github.com/Cheshire-Labs/orca)
+- **Venus Driver Repo:** [https://github.com/Cheshire-Labs/venus-driver](https://github.com/Cheshire-Labs/venus-driver)
+
+## License
+
+This project is licensed under the **GNU Affero General Public License**.
 
 ---
 
-## Following extension guidelines
+📢 **Feedback is encouraged!** Let’s work together to improve lab automation! Reach out at [**support@cheshirelabs.io**](mailto\:support@cheshirelabs.io).
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
