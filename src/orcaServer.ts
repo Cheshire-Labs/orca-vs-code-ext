@@ -239,7 +239,7 @@ export class OrcaServer{
         await this.orcaServerHandler.waitforhost();
         await this.loggingSocketHandler.connect();
         
-        await this.isConnectable();
+        this._isConnectable = true;
     }
     async stopOrcaServer() {
         await this.orcaServerHandler.stopOrcaServer();
