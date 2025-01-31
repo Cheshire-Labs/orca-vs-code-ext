@@ -148,11 +148,10 @@ export class InstalledDriversTreeViewProvider implements vscode.TreeDataProvider
 
     onOrcaApiConnectable(isConnectable: boolean) {
         this.isApiConnectable = isConnectable;
-        if (isConnectable) {
-            this.refreshTree();
-        } else {
-            this._onDidChangeTreeData.fire();
+        if (!isConnectable) {
+            this.installedDrivers = [];
         }
+        this._onDidChangeTreeData.fire();
     }
 
     async refreshTree(): Promise<void> {
@@ -173,7 +172,7 @@ export class InstalledDriversTreeViewProvider implements vscode.TreeDataProvider
             this.installedDrivers = [];
             const driverNames = await this.orcaApi.getInstalledDrivers();
             if (Array.isArray(driverNames)) {
-                this.installedDrivers = driverNames.map(name => new DriverTreeItem(name));
+                this.installedDrivers = driverNames.map(name => new DriverTreeItem(name, 'driver', true));
             }
         } catch (error) {
             vscode.window.showErrorMessage(`Error getting installed drivers: ${error}`);
@@ -213,11 +212,10 @@ export class AvailableDriversTreeViewProvider implements vscode.TreeDataProvider
 
     onOrcaApiConnectable(isConnectable: boolean) {
         this.isApiConnectable = isConnectable;
-        if (isConnectable) {
-            this.refreshTree();
-        } else {
-            this._onDidChangeTreeData.fire();
+        if (!isConnectable) {
+            this.availableDrivers = [];
         }
+        this._onDidChangeTreeData.fire();
     }
 
     async refreshTree(): Promise<void> {

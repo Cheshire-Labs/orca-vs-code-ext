@@ -239,20 +239,11 @@ export class OrcaServer{
         await this.orcaServerHandler.waitforhost();
         await this.loggingSocketHandler.connect();
         
-        // Start periodic connection check
-        const checkConnection = setInterval(async () => {
-            await this.isConnectable();
-        }, 2000);
-
-        // Clean up interval when server stops
-        this.onIsConnectable.event(isConnectable => {
-            if (!isConnectable) {
-                clearInterval(checkConnection);
-            }
-        });
+        this._isConnectable = true;
     }
     async stopOrcaServer() {
         await this.orcaServerHandler.stopOrcaServer();
         this.loggingSocketHandler.disconnect();
+        this._isConnectable = false;
     }
 }

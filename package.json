@@ -73,6 +73,12 @@
         "category": "Orca",
         "command": "orca-ide.installDriver",
         "icon": "$(cloud-download)"
+      },
+      {
+        "title": "Uninstall Driver",
+        "category": "Orca",
+        "command": "orca-ide.uninstallDriver",
+        "icon": "$(trash)"
       }
     ],
     "menus": {
@@ -109,6 +115,11 @@
         {
           "command": "orca-ide.installDriver",
           "when": "view == orca-ide.available-drivers-view && viewItem == availableDriver",
+          "group": "inline"
+        },
+        {
+          "command": "orca-ide.uninstallDriver",
+          "when": "view == orca-ide.installed-drivers-view && viewItem == installedDriver",
           "group": "inline"
         }
       ]
