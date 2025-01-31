@@ -248,7 +248,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showErrorMessage('No driver selected for uninstallation.');
             return;
         }
-        
+        vscode.window.showInformationMessage(`Driver '${driverName}' is uninstalling...`);
         const result = await orcaApi.uninstallDriver(driverName);
         if (result) {
             vscode.window.showInformationMessage(`Driver '${driverName}' uninstalled successfully.`);
