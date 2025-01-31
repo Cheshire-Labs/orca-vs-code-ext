@@ -43,10 +43,77 @@ Orca enables users to define and run workflows for lab automation by coordinatin
    pip install orca-driver-venus
    ```
    Alternatively, use the **IDE’s driver install functionality**.
-4. Import the **Hamilton Venus** packages by placing them in:
-   ```
-   C:\Program Files (x86)\HAMILTON\Methods\Cheshire Labs\
-   ```
+
+4. If using the **Venus Driver**, see [https://github.com/Cheshire-Labs/venus-driver](https://github.com/Cheshire-Labs/venus-driver) for the Venus driver and Venus submethod. 
+
+
+## Running the Examples
+
+Before running the examples, ensure that the **Orca VS Code Extension** is installed via the **VS Code Marketplace**.
+
+### SMC Assay Example
+
+The **SMC Assay** example can be found in the `examples/smc_assay` folder. This example can be simulated directly within the **Orca IDE**.
+
+#### Steps to Run:
+
+1. **Open the Configuration File (Optional)**
+
+   - Open `examples/smc_assay/smc_assay_example.orca.yml` in **VS Code** to review the setup.
+
+2. **Load the Configuration File**
+
+   - Click the **Load button** (☁️ with an up arrow) at the top right of the **Workflows View**.
+   - Select the file `examples/smc_assay/smc_assay_example.orca.yml`.
+
+3. **Run the Workflow**
+
+   - Click the **Play button** next to a workflow.
+   - Select a **configuration deployment stage** when prompted. (This corresponds to a defined stage in the `config` section of the configuration file.)
+   - The workflow should begin execution, and logs will be output in the **Logging Window**.
+
+4. **Run a Method (Optional)**
+
+   - Click the **Play button** next to a method.
+   - Select the deployment stage.
+   - When prompted, select the **start and end locations** for each required labware.
+
+### Venus Demo Example
+
+The **Venus Demo** example is located in the `examples/venus_demo` folder. To run this example successfully, follow these steps:
+
+1. **Import the Venus Packages**
+
+   - The `.pkg` files included in the `venus_demo` folder must be imported into **Hamilton Venus**.
+   - Place the methods in the following directory:
+     ```
+     C:\Program Files (x86)\HAMILTON\Methods\Cheshire Labs\
+     ```
+
+2. **Install the Venus Driver**
+
+   - The Venus example requires the **Orca Venus Driver** to be installed.
+   - You can install it using **pip**:
+     ```sh
+     pip install orca-driver-venus
+     ```
+   - Alternatively, install it directly via the **Orca IDE** under the **Available Drivers** section.
+
+3. **Load the Configuration File**
+
+   - Open the **Orca IDE** in VS Code.
+   - Click the **Load button** (☁️ with an up arrow) at the top right of the **Workflows View**.
+   - Select the file `examples/venus_demo/venus_demo.orca.yml`.
+
+4. **Run the Venus Demo**
+
+   - Click the **Play button** next to the **Venus Demo** workflow or method.
+   - Select the **configuration deployment stage** when prompted.
+   - If running a method, you will need to select the **start and end locations** for required labware.
+
+By following these steps, you can execute the **SMC Assay** and **Venus Demo** examples within the **Orca IDE**. Let me know if you need further clarification!
+
+
 
 ## Using the Extension
 
