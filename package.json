@@ -21,10 +21,6 @@
     ],
     "commands": [
       {
-        "command": "orca-ide.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "orca.copyExamples",
         "title": "Copy Example Orca YAML files to Workspace",
         "category": "Orca"

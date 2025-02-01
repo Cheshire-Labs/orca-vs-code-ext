@@ -1,0 +1,123 @@
+system:
+  name: basic-venus
+  version: 1.0.0
+  description: Basic Venus setup
+
+labwares:
+  source-plate:
+    type: Biorad Half skirt
+  destination-plate:
+    type: Biorad Half skirt
+
+resources:
+  robot-1:
+      type: ddr
+      positions: mock_teachpoints.xml
+      sim: true
+      base-type: transporter
+
+  mlstar:
+    type: venus
+    plate-pad: hamilton_1
+
+  mlstar-2:
+    type: venus
+    plate-pad: hamilton_2
+
+config:
+  
+  # Production
+  prod:
+    stage: prod
+    numOfPlates: 4
+    waterVol: 40.5
+    dyeVol: 5.5
+    tipEjectPos: 1 # waste tips
+    asp: 
+      clld: 5 # turn on liquid sensing
+      liquidClass: 
+    disp:
+      clld: 5
+    wait: 300
+    intParam: 1
+    strParam: Production
+  
+  wetTest:
+    stage: Water Test
+    numOfPlates: 1
+    waterVol: 5.2
+    dyeVol: 5.2
+    tipEjectPos: 2 # return tips
+    asp: 
+      clld: 5 # turn on liquid sensing
+    disp:
+      clld: 5
+    wait: 1
+    intParam: 2
+    strParam: Wet Testing
+
+  dryTest:
+    stage: Dry Test
+    numOfPlates: 1
+    waterVol: 0
+    dyeVol: 0
+    tipEjectPos: 2 # return tips
+    asp: 
+      clld: 0 # turn off liquid sensing
+    disp:
+      clld: 0
+    wait: 1
+    intParam: 3
+    strParam: Dry Testing
+    
+    
+
+methods:
+  plate-stamp:
+    actions:
+      - mlstar:
+          command: run
+          inputs:
+            - source-plate
+            - destination-plate
+          method: Cheshire Labs\\SimplePlateStamp.hsl
+          params:
+            numOfPlates: ${config:${opt:stage}.numOfPlates}
+            stage: ${config:${opt:stage}.stage}
+            waterVol: ${config:${opt:stage}.waterVol}
+            dyeVol: ${config:${opt:stage}.dyeVol}
+            clld: ${config:${opt:stage}.asp.clld}
+            wait: ${config:${opt:stage}.wait}
+            tipEjectPos: ${config:${opt:stage}.tipEjectPos}
+  variable-access:
+    actions:
+      - mlstar-2:
+          command: run
+          inputs:
+            - destination-plate
+          method: Cheshire Labs\\VariableAccessTesting.hsl
+          params:
+            intParam: ${config:${opt:stage}.intParam}
+            strParam: ${config:${opt:stage}.strParam}
+
+workflows:
+  test-workflow:
+    threads:
+      dna-plate:
+        labware: source-plate
+        type: start
+        start: pad_1
+        end: pad_2
+        steps:
+          - method: plate-stamp
+            spawn: 
+              - destination-plate
+
+      product-plate:
+        labware: destination-plate
+        type: wrapper
+        start: pad_3
+        end: pad_4
+        steps:
+          - ${0}
+          - variable-access
