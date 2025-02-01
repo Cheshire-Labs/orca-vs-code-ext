@@ -176,5 +176,5 @@ This project is licensed under the **GNU Affero General Public License**.
 
 ---
 
-📢 **Feedback is encouraged!** Let’s work together to improve lab automation! Reach out at [**support@cheshirelabs.io**](mailto\:support@cheshirelabs.io).
+📢 **Feedback is encouraged!** Let’s work together to improve lab automation! Reach out at [**support@cheshirelabs.io**](mailto:support@cheshirelabs.io).
 
