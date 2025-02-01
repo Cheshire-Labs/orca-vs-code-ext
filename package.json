@@ -1,9 +1,10 @@
 {
-  "name": "orca-ide",
-  "displayName": "orca-ide",
+  "name": "orca-vs-code-ext",
+  "displayName": "Orca Lab Automation Scheduler IDE",
   "description": "Extension to integrate Orca Lab Automation Scheduler with VS Code IDE",
   "version": "0.1.0",
-  "publisher": "cheshire-labs",
+  "publisher": "CheshireLabs",
+  "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "https://github.com/Cheshire-Labs/orca-vs-code-ext"},
@@ -11,7 +12,15 @@
     "vscode": "^1.92.0"
   },
   "categories": [
+    "Extension Packs",
     "Other"
+  ],
+  "keywords": [
+    "orca",
+    "lab automation",
+    "scheduler",
+    "labs",
+    "science"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
