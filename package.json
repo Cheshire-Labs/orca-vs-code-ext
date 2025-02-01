@@ -4,6 +4,7 @@
   "description": "Extension to integrate Orca Lab Automation Scheduler with VS Code IDE",
   "version": "0.1.0",
   "publisher": "cheshirelabs",
+  "icon": "images/white_logo_black_bg.png",
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
@@ -25,10 +26,10 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
-    "yaml.schemas": [
+    "yamlValidation": [
       {
-        "fileMatch": "*.orca.yml",
-        "url": "./src/yaml_schema/orca_schema.json"
+        "fileMatch": ["*.orca", "*.orca.yml", "*.orca.yaml"],
+        "url":  "./yaml_schema/orca_schema.json"
       }
     ],
     "commands": [
@@ -137,7 +138,7 @@
         {
           "id": "orca-activity-bar",
           "title": "Orca",
-          "icon": "src/images/grey_logo_transparent.png"
+          "icon": "images/grey_logo_transparent.png"
         }
       ]
     },
