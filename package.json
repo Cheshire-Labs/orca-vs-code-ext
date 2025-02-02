@@ -1,5 +1,5 @@
 {
-  "name": "orca-vs-code-ext",
+  "name": "orca-ide",
   "displayName": "Orca Lab Automation Scheduler IDE",
   "description": "Extension to integrate Orca Lab Automation Scheduler with VS Code IDE",
   "version": "0.1.0",

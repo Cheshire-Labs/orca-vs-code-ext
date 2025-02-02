@@ -10,7 +10,7 @@ export async function copyExamplesToWorkspace() {
     }
 
     const workspaceDir = workspaceFolders[0].uri.fsPath; // Use the first workspace folder
-    const extensionPath = vscode.extensions.getExtension('cheshire-labs.orca-ide')?.extensionPath;
+    const extensionPath = vscode.extensions.getExtension('cheshirelabs.orca-ide')?.extensionPath;
 
     if (!extensionPath) {
         vscode.window.showErrorMessage('Failed to locate the extension path.');
