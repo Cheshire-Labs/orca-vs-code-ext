@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { ChildProcess, spawn } from 'child_process';
 import { io, Socket } from 'socket.io-client';
 import { LoggingChannels } from './loggingChannels';
-import { json } from 'stream/consumers';
+import { OrcaInstaller } from './orcaInstaller';
 
 
 class LoggingSocketHandler {    
@@ -100,15 +100,29 @@ class OrcaServerHandler {
             return;
         }
         
-        const config = vscode.workspace.getConfiguration('orca');
-        const orcaCommand = process.env.ORCA_PATH || "orca";
-
         this.logger.extensionLog(`Starting Orca server...`);
-        this.logger.extensionLog(`Orca command: ${orcaCommand}`);
 
+        // check python path exists
+        const orcaInstaller: OrcaInstaller = new OrcaInstaller();
+        const pythonPath = orcaInstaller.pythonPath;
+        if (!pythonPath) {
+            vscode.window.showErrorMessage('Python interpreter not found. Set the Python interpreter path in VS Code settings.');
+            return;
+        }
+
+        // ensure Orca is installed
+        const isInstalled = await orcaInstaller.ensureOrcaInstalled();
+        if (!isInstalled) {
+            return;
+        }
+        const orcaExe = orcaInstaller.getOrcaExecutable();
+        if (!orcaExe) {
+            vscode.window.showErrorMessage('Orca executable not found. Please install Orca.');
+            return;
+        }
         
         try {
-            this.orcaProcess = spawn(`${orcaCommand}`, ["server"], {
+            this.orcaProcess = spawn(orcaExe, ["server"], {
                 shell: true,
             });
             
@@ -124,8 +138,7 @@ class OrcaServerHandler {
                 vscode.window.showErrorMessage(`Failed to start Orca server: ${error.message}`);
                 this.orcaProcess = null;
             });
-    
-            this.logger.extensionLog(`Orca server started.`);
+            
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             this.logger.serverLog(`Failed to start Orca server: ${errorMessage}`);
@@ -178,7 +191,7 @@ class OrcaServerHandler {
         return fetch(`${this.url}/test`).then(response => response.status === 200).catch(() => false);
     }
     
-    waitforhost(interval: number = 1000, attempts: number = 10): Promise<void> {
+    waitforhost(interval: number = 1000, attempts: number = 3): Promise<void> {
       
         const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
         

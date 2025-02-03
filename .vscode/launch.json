@@ -16,10 +16,6 @@
 				"${workspaceFolder}/dist/**/*.js"
 			],
 			"preLaunchTask": "${defaultBuildTask}",
-			"env": {
-                "PYTHONPATH": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
-				"ORCA_PATH": "${workspaceFolder}\\.venv\\Scripts\\orca.exe"
-            }
 		},
 		{
 			"name": "Run Extension (Mac)",
@@ -32,10 +28,6 @@
 				"${workspaceFolder}/dist/**/*.js"
 			],
 			"preLaunchTask": "${defaultBuildTask}",
-			"env": {
-                "PYTHONPATH": "${workspaceFolder}/.venv/bin/python",
-				"ORCA_PATH": "${workspaceFolder}/.venv/bin/orca"
-            }
 		}
 	]
 }
