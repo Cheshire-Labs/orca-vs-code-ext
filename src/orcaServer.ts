@@ -138,7 +138,7 @@ class OrcaServerHandler {
                 vscode.window.showErrorMessage(`Failed to start Orca server: ${error.message}`);
                 this.orcaProcess = null;
             });
-            
+    
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             this.logger.serverLog(`Failed to start Orca server: ${errorMessage}`);
