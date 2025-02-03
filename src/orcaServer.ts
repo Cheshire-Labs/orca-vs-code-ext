@@ -125,7 +125,6 @@ class OrcaServerHandler {
                 this.orcaProcess = null;
             });
     
-            this.logger.extensionLog(`Orca server started.`);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             this.logger.serverLog(`Failed to start Orca server: ${errorMessage}`);
@@ -178,7 +177,7 @@ class OrcaServerHandler {
         return fetch(`${this.url}/test`).then(response => response.status === 200).catch(() => false);
     }
     
-    waitforhost(interval: number = 1000, attempts: number = 10): Promise<void> {
+    waitforhost(interval: number = 1000, attempts: number = 3): Promise<void> {
       
         const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
         
