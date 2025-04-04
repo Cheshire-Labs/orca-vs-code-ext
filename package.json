@@ -2,7 +2,7 @@
   "name": "orca-ide",
   "displayName": "Orca Lab Automation Scheduler IDE",
   "description": "Extension to integrate Orca Lab Automation Scheduler with VS Code IDE",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "cheshirelabs",
   "icon": "images/white_logo_black_bg.png",
   "license": "AGPL-3.0-only",
