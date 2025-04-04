@@ -51,7 +51,7 @@ export class OrcaApi {
             await axios.post(this.url + '/init');
             return true;
         } catch (error) {
-            this.logger.extensionLog(`Failed to initialize resources: ${error}`);
+            this.logger.extensionLog(`Failed to initialize resources: ${error}.  Ensure that configuration file has been loaded.`);
             return false;
         }
     }
