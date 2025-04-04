@@ -191,7 +191,7 @@ class OrcaServerHandler {
         return fetch(`${this.url}/test`).then(response => response.status === 200).catch(() => false);
     }
     
-    waitforhost(interval: number = 1000, attempts: number = 3): Promise<void> {
+    waitforhost(interval: number = 1000, attempts: number = 5): Promise<void> {
       
         const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
         
